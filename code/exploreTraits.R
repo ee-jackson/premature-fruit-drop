@@ -9,6 +9,7 @@ library(reshape2)
 library(data.table)
 library(ggpubr)
 library(ggExtra)
+library(ggrepel)
 theme_set(theme_bw())
 
 
@@ -169,4 +170,18 @@ ggplot(data= subset(traitDat, total_seeds>500), aes(x=BCIReproductive, y=proport
 	facet_wrap(~year) +
 	theme(legend.position = "none")
 ggsave("../results/propAbscised_BCIrepro_greaterThan500.png")
+
+give.yr <- function(x){
+   return(c(y = -0.1, label = length(x)))
+}
+
+ggplot(data= seedDat, aes(x=FAMILY, y=proportion_abscised, group=sp,fill=as.factor(FAMILY))) +
+	geom_boxplot(alpha= 0.8,position = position_dodge2(preserve = "single")) +
+	scale_fill_manual(values=pal)+
+	stat_summary(fun.data = give.yr, geom = "text", size=3, position=position_nudge(x = 2, y = 0))+
+	theme(axis.text.x=element_text(angle=90, hjust=1, vjust=0.5), legend.position = "none")
+
+
+
+
 
