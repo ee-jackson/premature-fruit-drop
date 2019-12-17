@@ -1,6 +1,7 @@
 #ignore these folders
 docs/
 data/
+output/
 
 # General
 .DS_Store

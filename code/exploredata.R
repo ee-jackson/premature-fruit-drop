@@ -13,10 +13,11 @@ library(ggpubr)
 library(ggExtra)
 theme_set(theme_bw())
 
-seedRainLauracea <- read.csv("../data/20140218_Lauracea_200trap.csv", header=TRUE, stringsAsFactors = FALSE)
 seedTrait <- read.csv("../data/20120227_seedsMassForTraits.csv", header=TRUE, stringsAsFactors = FALSE)
+tidyTraits <- read.csv("../data/TidyTrait.csv", header=TRUE, stringsAsFactors = FALSE)
 seedRain<-read.table("../data/BCI_TRAP200_20190215_spcorrected.txt", header=TRUE, stringsAsFactors = FALSE)
-propDat <- read.csv("../data/proportionAbscised.csv", header=TRUE, stringsAsFactors = FALSE)
+propDat <- read.csv("../output/tables/proportionAbscised.csv", header=TRUE, stringsAsFactors = FALSE)
+sumDat <- read.csv("../output/tables/summarizeSeedRain.csv", header=TRUE, stringsAsFactors = FALSE)
 
 
 #convert fetcha to class Date

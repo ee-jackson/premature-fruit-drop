@@ -13,15 +13,22 @@ library(ggrepel)
 theme_set(theme_bw())
 
 
-seedTrait<-read.csv("../data/20120227_seedsMassForTraits.csv", header=TRUE, stringsAsFactors = FALSE)
+seedTrait <- read.csv("../data/20120227_seedsMassForTraits.csv", header=TRUE, stringsAsFactors = FALSE)
 tidyTraits <- read.csv("../data/TidyTrait.csv", header=TRUE, stringsAsFactors = FALSE)
-propDat <- read.csv("../data/proportionAbscised.csv", header=TRUE, stringsAsFactors = FALSE)
+seedRain<-read.table("../data/BCI_TRAP200_20190215_spcorrected.txt", header=TRUE, stringsAsFactors = FALSE)
+propDat <- read.csv("../output/tables/proportionAbscised.csv", header=TRUE, stringsAsFactors = FALSE)
+sumDat <- read.csv("../output/tables/summarizeSeedRain.csv", header=TRUE, stringsAsFactors = FALSE)
+disDat <- read.csv("../output/tables/dispersalMode.csv", header=TRUE, stringsAsFactors = FALSE)
 
 #merge datasets
 
-TraitDat <- dplyr::left_join(propDat, seedTrait, by = c("sp" = "SP4"), all.x=TRUE)
+traitDat <- dplyr::left_join(sumDat, tidyTraits, by = c("sp" = "Codigo"), all.x=TRUE)
 
-traitDat <- dplyr::left_join(TraitDat, tidyTraits, by = c("sp" = "Codigo"), all.x=TRUE)
+traitSum <- dplyr::left_join(disDat, seedTrait, by = c("sp" = "SP4"), all.x=TRUE)
+
+traitDat <- dplyr::left_join(disDat, tidyTraits, by = c("sp" = "Codigo"), all.x=TRUE)
+
+tidyProp <- dplyr::left_join(propDat, tidyTraits, by = c("sp" = "Codigo"), all.x=TRUE)
 
 #############################################
 
@@ -141,13 +148,23 @@ ggsave("../results/CoFruit_allSp.png")
 
 seedDat <- subset(TraitDat,LIFEFORM== "LIANA"|LIFEFORM== "MIDSTORY"|LIFEFORM== "SHRUB"|LIFEFORM== "TREE"|LIFEFORM=="UNDERSTORY")
 
-seedDat <- subset(seedDat,total_seeds>500)
+#seedDat <- subset(seedDat,total_seeds>500)
 
-ggplot(data= seedDat, aes(x=sp, y=proportion_abscised)) +
+ggplot(data= subset(seedDat,total_seeds>500), aes(x=sp, y=proportion_abscised)) +
 	geom_boxplot(alpha= 0.8, width=1) +
 	theme(axis.text.x=element_text(angle=90, hjust=1, vjust=0.5)) +
 	scale_y_continuous(expand= c(0.05, 0.05), limits = c(0,1))
-ggsave("../results/prop_abscised_greaterThan500.png")
+ggsave("../output/plots/prop_abscised_greaterThan500.png")
+
+
+
+ggplot(data= sumDat, aes(x=FAMILY, y=proportion_abscised, fill=LIFEFORM)) +
+	geom_boxplot(alpha= 0.8,position = position_dodge2(preserve = "single")) +
+	theme(axis.text.x=element_text(angle=90, hjust=1, vjust=0.5), legend.position = "none") +
+	geom_hline(yintercept=0.5, linetype="dashed", color = "red", size=0.5)
+ggsave("../../notable/attachments/20191126/prop_abscised_fam.png")
+
+
 
 library(randomcoloR)
 pal <- distinctColorPalette(32)
@@ -165,15 +182,47 @@ ggplot(data= subset(seedDat, total_seeds>500), aes(x=total_seeds, y=proportion_a
 	theme(legend.position = "none")
 ggsave("../results/propAbscised_totalSeeds_greaterThan500.png")
 
-ggplot(data= subset(traitDat, total_seeds>500), aes(x=BCIReproductive, y=proportion_abscised, colour= as.factor(sp))) +
-	geom_point(position= position_dodge(1), alpha=0.8, size=1) +
-	facet_wrap(~year) +
+ggplot(data=traitSum, aes(x=log(BCIReproductive), y=proportion_abscised)) +
+	geom_point(alpha=0.8, size=1) +
 	theme(legend.position = "none")
-ggsave("../results/propAbscised_BCIrepro_greaterThan500.png")
+ggsave("../output/plots/propAbscised_BCIrepro.png")
 
-give.yr <- function(x){
-   return(c(y = -0.1, label = length(x)))
-}
+
+ggplot(data=subset(tidyProp, year==2010), aes(x=log(BCIReproductive), y=proportion_abscised)) +
+	geom_point(alpha=0.8, size=1) +
+	theme(legend.position = "none")
+ggsave("../../notable/attachments/20191126/propAbscised_BCIrepro_2010.png")
+
+
+
+p1 <- ggplot(data=traitSum, aes(x=log(SEED_DRY), y=proportion_abscised)) +
+			geom_point(alpha=0.8, size=1) +
+			theme(legend.position = "none")
+
+p2 <- ggplot(data=traitSum, aes(x=log(SEED_FRESH), y=proportion_abscised)) +
+			geom_point(alpha=0.8, size=1) +
+			theme(legend.position = "none")
+
+p3 <- ggplot(data=traitSum, aes(x=log(FRUIT_DRY), y=proportion_abscised)) +
+			geom_point(alpha=0.8, size=1) +
+			theme(legend.position = "none")
+
+p4 <- ggplot(data=(traitSum), aes(x=log(FRUIT_FRSH), y=proportion_abscised)) +
+			geom_point(alpha=0.8, size=1) +
+			theme(legend.position = "none")
+
+ggarrange(p1,p2,p3,p4)
+ggsave("../../notable/attachments/20191126/propAbscised_seedmass.png")
+
+p5 <- ggplot(data=traitSum, aes(x=log(DSPR_DRY), y=proportion_abscised)) +
+			geom_point(alpha=0.8, size=1) +
+			theme(legend.position = "none")
+
+p6 <- ggplot(data=(traitSum), aes(x=log(DSPR_FRESH), y=proportion_abscised)) +
+			geom_point(alpha=0.8, size=1) +
+			theme(legend.position = "none")
+ggarrange(p5,p6)
+ggsave("../../notable/attachments/20191126/propAbscised_diasporemass.png")
 
 ggplot(data= seedDat, aes(x=FAMILY, y=proportion_abscised, group=sp,fill=as.factor(FAMILY))) +
 	geom_boxplot(alpha= 0.8,position = position_dodge2(preserve = "single")) +
@@ -181,7 +230,91 @@ ggplot(data= seedDat, aes(x=FAMILY, y=proportion_abscised, group=sp,fill=as.fact
 	stat_summary(fun.data = give.yr, geom = "text", size=3, position=position_nudge(x = 2, y = 0))+
 	theme(axis.text.x=element_text(angle=90, hjust=1, vjust=0.5), legend.position = "none")
 
+ggplot(data= sumDat, aes(x=proportion_abscised)) +
+	geom_histogram(stat = "bin",
+  position = "stack", binwidth = 0.1, bins = NULL,
+  na.rm = TRUE, show.legend = NA, inherit.aes = TRUE) +
+	scale_x_continuous(expand= c(0, 0),limits=c(0,1)) 
+
+# Histogram overlaid with kernel density curve
+ggplot(subset(sumDat, total_seeds>100), aes(x=proportion_abscised)) + 
+    geom_histogram(aes(y=..density..), binwidth=.05, colour="black", fill="white") +
+    geom_density(alpha=.2, fill="#FF6666") +
+    geom_vline(aes(xintercept=mean(proportion_abscised, na.rm=TRUE)), color="red", linetype="dashed", size=1)
+ggsave("../../notable/attachments/20191126/propAbscised_histo_density_greaterthan100.png")
+
+ggplot(subset(sumDat, total_seeds>100), aes(x=proportion_abscised, fill=LIFEFORM)) + 
+	geom_density(alpha=.3)
+ggsave("../../notable/attachments/20191126/propAbscised_density_greaterthan100.png")
+
+p2<-ggplot(subset(sumDat, total_seeds>10), aes(x=proportion_abscised)) + 
+		geom_histogram(binwidth=.05, colour="black", fill="white") + 
+	    facet_wrap(LIFEFORM ~ .)
+ggsave("../../notable/attachments/20191126/propAbscised_histo_lifeform.png")
+
+# subset the data
+p3<-ggplot(subset(sumDat, total_seeds>10), aes(x=proportion_abscised)) + 
+	    geom_histogram(aes(y=..density..), binwidth=.05, colour="black", fill="white") +
+	    geom_density(alpha=.2, fill="#FF6666") +
+    facet_wrap(LIFEFORM ~ .)
+ggsave("../../notable/attachments/20191126/propAbscised_histo_density_lifeform_greaterthan100.png")
+
+ggplot(subset(sumDat, total_seeds>100), aes(x=proportion_abscised)) + 
+    geom_histogram(aes(y=..density..), binwidth=.05, colour="black", fill="white") +
+    geom_density(alpha=.2, fill="#FF6666") +
+    facet_wrap(LIFEFORM ~ .)
+ggsave("../../notable/attachments/20191126/propAbscised_histo_density_lifeform_greaterthan100.png")
 
 
+sumDat$LIFEFORM <- factor(sumDat$LIFEFORM, levels = c("LIANA", "SHRUB", "UNDERSTORY", "MIDSTORY", "TREE"))
 
+p1<-ggplot(subset(sumDat, total_seeds>10), aes(y=proportion_abscised, x=LIFEFORM)) + 
+		geom_boxplot(alpha= 0.8,position = position_dodge2(preserve = "single"))
 
+ggarrange(p1,p2,p3)
+ggsave("../output/plots/20191203/lifeform_abscision_greaterthan50seeds.png")
+
+############# DISDAT
+
+ggplot(disDat, aes(x=proportion_abscised)) + 
+    geom_histogram(aes(y=..density..), binwidth=.05, colour="black", fill="white") +
+    geom_density(alpha=.2, fill="#FF6666") +
+    facet_wrap(dispersal_mode ~ .)
+
+ggplot(disDat, aes(x=proportion_abscised, fill=dispersal_mode)) + 
+	geom_density(alpha=.3)
+
+ggplot(disDat, aes(x=proportion_abscised)) + 
+	geom_histogram(binwidth=.05, colour="black", fill="white") + 
+    facet_wrap(dispersal_mode ~ .)
+ggsave("../output/plots/dispersal_mode_histogram.png")
+
+ggplot(subset(disDat, total_seeds>100), aes(y=proportion_abscised, x=bio)) + 
+		geom_boxplot(alpha= 0.8,position = position_dodge2(preserve = "single"))
+
+ggplot(subset(disDat, total_seeds>100), aes(y=proportion_abscised, x=dispersal_mode, fill=bio)) + 
+		geom_boxplot(alpha= 0.8,position = position_dodge2(preserve = "single"))
+
+ggplot(subset(disDat, total_seeds>50), aes(y=proportion_abscised, x=bio)) + 
+		geom_boxplot(alpha= 0.8,position = position_dodge2(preserve = "single"), width=0.4) +
+		geom_jitter(shape=16, position=position_jitter(0.2), alpha=0.5) 
+ggsave("../output/plots/20191203/dispersalbio_abscision_greaterthan50seeds.png")
+
+ggplot(subset(disDat, total_seeds>50), aes(x=proportion_abscised, fill=bio)) +
+	geom_density(alpha=.3)
+ggsave("../output/plots/20191203/dispersalbio_abscision_density_greaterthan50seeds.png")
+
+######################## TRAITDAT
+
+traitDat %>%
+	subset(total_seeds>50) %>%
+	select(c("sp", "Coleo_pres", "Hymeno_pres", "Lepid_pres", "proportion_abscised")) %>%
+	melt(id.vars=c("sp", "proportion_abscised"), measure.vars=c("Coleo_pres", "Hymeno_pres", "Lepid_pres")) %>%
+	rename(predator=variable, presence=value)-> presDat
+
+ggplot(na.omit(presDat), aes(y=proportion_abscised, group=presence, x=presence)) + 
+		geom_boxplot(alpha= 0.8,position = position_dodge2(preserve = "single"), width=0.4)+
+		facet_wrap(~predator) +
+		geom_jitter(shape=16, position=position_jitter(0.2), alpha=0.5) +
+		scale_x_continuous(breaks=c(0,1), labels=c(0,1), limits=c(-0.5,1.5))
+ggsave("../output/plots/20191203/pres_abscision_greaterthan50seeds.png")

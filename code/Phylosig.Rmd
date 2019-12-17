@@ -1,0 +1,87 @@
+---
+title: "Phylogenetic Signal"
+author: "E J"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: 
+  html_document: 
+    toc: yes
+---
+
+# Packages and Data
+
+```{r, message=FALSE, warning=FALSE}
+rm(list=ls())
+
+require(tidyverse)
+require(knitr)
+require(phytools)
+require(ape)
+require(caper)
+require(picante)
+require(geiger)
+
+select<- dplyr::select # to ensure dplyr version of select is default
+```
+
+```{r}
+SD<-readr::read_csv("../output/tables/summarizeSeedRain.csv")
+TidyTrait<- readr::read_csv('../data/TidyTrait.csv')
+PhyloExtraSpec<-read.tree('../data/PhyloExtraSpec.tree')
+Trait<-left_join(SD, TidyTrait, by=c("sp" = "Codigo"))
+```
+
+```{r}
+Trait<-subset(Trait, total_seeds>50)
+Trait<-subset(Trait, select=c(proportion_abscised, Plant_species19))
+t <- na.omit(Trait)
+t<-rename(t, taxa=Plant_species19) 
+
+check <- geiger::name.check(phy = PhyloExtraSpec, data = t, data.names = t$taxa)
+check
+
+newtree <- drop.tip(PhyloExtraSpec, check$tree_not_data)
+
+# remove polytomies
+newtree <- multi2di(newtree, random = TRUE)
+
+#label nodes
+newtree$node.label <- 1:length(newtree$node.label)
+
+# Make sure edge length isn't zero
+newtree$edge.length  <-newtree$edge.length +0.001
+
+# Put them in the right order:
+t <- t[   match(newtree$tip.label, t$taxa),   ] 
+
+# make comparative data object and check to see what it dropped
+trees <- comparative.data(phy = newtree, data =as.data.frame(t), 
+                            names.col = taxa, vcv = TRUE, 
+                            na.omit = TRUE, warn.dropped = TRUE)
+trees$dropped$tips
+trees$dropped$unmatched.rows
+```
+The strongest argumentfor Pagel’skis that it provides a reliable effect size measurebesides testing for phylogenetic signal.
+
+```{r}
+#pgls model, Pagel’s λ
+lambdaPA <- pgls(proportion_abscised ~ 1, data = trees, lambda = "ML")
+summary(lambdaPA)
+
+#Blomberg’s K
+p_a <- t$proportion_abscised
+names(p_a) <- t$taxa
+Kcalc(p_a[newtree$tip.label], newtree)
+
+set.seed(1)
+phylosignal(x=p_a[newtree$tip.label], phy=newtree, reps = 1000)
+
+picante::phylosignal(x=p_a,phy=newtree, reps = 1000)
+# PIC.variance.P =0.1848152, so not significantly different from the random values of K
+
+phytools::phylosig(x=p_a,tree=newtree, test=TRUE, nsim = 1000) # Check using other package
+# here p is 0.131
+
+phytools::plotTree.wbars(newtree,p_a, showTipLabel=FALSE, showNodeLabel=FALSE, fsize=0.5)
+contMap(newtree, p_a, fsize=0.5, type="fan")
+ggsave("../output/plots/20191203/contMap.png")
+```

@@ -103,4 +103,4 @@ fullSummary <- list(propDat, seedDat.sumParts, seedDat.nTrapsYears) %>%
 
 seedDat.summary <- left_join(fullSummary, seedTrait, by = c("sp" = "SP4"))
 
-write.csv(seedDat.summary, "../output/tables/summarizeSeedRain_v2.csv")
+write.csv(seedDat.summary, "../output/tables/summarizeSeedRain.csv")
