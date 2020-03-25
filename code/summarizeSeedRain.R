@@ -1,6 +1,6 @@
 #!/usr/bin/env Rscript
 
-## Author: Eleanor Jackson eleanor.elizabeth.j@gmail.com
+## Author: E E Jackson, eleanor.elizabeth.j@gmail.com
 ## Script: summarizeSeedRain.R
 ## Desc: generate a summary table of the SeedRain dataset
 ## Date: November 2019
@@ -26,7 +26,7 @@ seedTrait <- subset(seedTrait,select = c(SP4, SP6, FAMILY, GENUS, SPECIES, LIFEF
 # add traits to seed rain dataset by species
 seedDat <- dplyr::left_join(seedRain, seedTrait, by = c("sp" = "SP4"))
 
-# subset datafrane to only woody plants and parts 1 (mature fruits), 2 (single diaspores), and 5 (immature fruit)
+# subset dataframe to only woody plants and parts 1 (mature fruits), 2 (single diaspores), and 5 (immature fruit)
 seedDat <- subset(seedDat, part==1|part==2|part==5)
 seedDat <- subset(seedDat,LIFEFORM== "LIANA"|LIFEFORM== "MIDSTORY"|LIFEFORM== "SHRUB"|LIFEFORM== "TREE"|LIFEFORM=="UNDERSTORY")
 
@@ -84,17 +84,17 @@ propDat <- propDat %>%
 #### summarise trap data ####
 
 seedDat.sumParts <- seedDat %>% 
+	replace(., is.na(.), 0) %>%
 	group_by(part,sp) %>%
 	summarise(quantity_sum= sum(quantity, na.rm=TRUE)) %>%
 	spread(part, quantity_sum)%>%
-	ungroup() %>%
-	replace(., is.na(.), 0)
+	ungroup() 
 
 seedDat.nTrapsYears <- seedDat %>% 
+	replace(., is.na(.), 0) %>%
 	group_by(sp) %>%
 	summarise(n_traps= n_distinct(trap, na.rm = TRUE), n_years= n_distinct(year, na.rm = TRUE))%>%
-	ungroup() %>%
-	replace(., is.na(.), 0) 
+	ungroup()
 
 fullSummary <- list(propDat, seedDat.sumParts, seedDat.nTrapsYears) %>% 
 	reduce(full_join, by = "sp")
@@ -103,4 +103,38 @@ fullSummary <- list(propDat, seedDat.sumParts, seedDat.nTrapsYears) %>%
 
 seedDat.summary <- left_join(fullSummary, seedTrait, by = c("sp" = "SP4"))
 
-write.csv(seedDat.summary, "../output/tables/summarizeSeedRain.csv")
+### add in weighted mean ###
+
+propAb<-read.csv("../output/tables/proportionAbscised.csv", header=TRUE, stringsAsFactors = FALSE)
+
+propAb.m <- propAb %>%
+	group_by(sp) %>%
+	summarise(proportion_abscised_w = mean(proportion_abscised, na.rm=TRUE)) %>%
+	ungroup()
+
+seedDat.summary2 <- left_join(seedDat.summary, propAb.m, by = "sp")
+
+write.csv(seedDat.summary2, "../output/tables/summarizeSeedRain.csv")
+
+#### a smaller summary ####
+propDat2<-subset(propDat, total_seeds > 50)
+seedDat.50 <- left_join(propDat2, seedDat, by = "sp")
+
+seedDat.sumPartsL <- seedDat.50 %>% 
+	replace(., is.na(.), 0) %>%
+	group_by(part, LIFEFORM) %>%
+	summarise(quantity_sum= sum(quantity, na.rm=TRUE)) %>%
+	spread(part, quantity_sum)%>%
+	ungroup() 
+
+seedDat.n <- seedDat.50 %>% 
+	replace(., is.na(.), 0) %>%
+	group_by(LIFEFORM) %>%
+	summarise(n_sp= n_distinct(sp, na.rm = TRUE), n_fam= n_distinct(FAMILY, na.rm = TRUE),)%>%
+	ungroup()
+
+shortSummary <- list(seedDat.sumPartsL, seedDat.n) %>% 
+	reduce(full_join, by = "LIFEFORM")
+
+write.csv(shortSummary, "../output/tables/summarizeSeedRain_short.csv")
+

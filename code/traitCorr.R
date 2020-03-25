@@ -12,6 +12,7 @@ library(ggExtra)
 library(purrr)
 library(Hmisc)
 library(raster)
+library(ggcorrplot)
 theme_set(theme_bw())
 
 #########
@@ -28,6 +29,11 @@ allTraits <- list(sumDat, seedTrait, tidyTraits) %>%
 	reduce(left_join, by = c("sp"="sp")) %>%
 	select_if(is.numeric) %>%
 	dplyr::select(-c(X,Coleo_pres, Hymeno_pres, Lepid_pres, SeedPred_pres))
+
+allTraits <- list(sumDat, seedTrait, tidyTraits) %>% 
+  reduce(left_join, by = c("sp"="sp")) %>%
+  select_if(is.numeric) %>%
+  dplyr::select(c(cvseed,seed_dry,Endocarp_investment,CoFruit,HEIGHT_AVG,BCIReproductive,proportion_abscised_w,SeedPredationRate,SeedPred_n))
 
 ########
 
@@ -62,7 +68,7 @@ seedTraits <- dplyr::select(allTraits, c(FRUIT_FRSH,FRUIT_DRY, N_SEEDFULL, N_SEE
 
 #Spearman is a non-parametric, thus it is not possible to get CIs. There is a error message because R cannot compute exact p values (the test is based on ranks, we have few cars with the same hp or wt).
 #We can get rid off the warning letting R know that approximate values are fine
-chart.Correlation(seedTraits, histogram=TRUE, pch=20, method="spearman", exact=FALSE)
+chart.Correlation(allTraits, histogram=TRUE, pch=20, method="spearman", exact=FALSE)
 ggplot2::ggsave("../output/plots/20191203/chart.corr_seedtraits_spearman.png")
 
 chart.Correlation(seedTraits, histogram=TRUE, pch=20, method="pearson")
@@ -85,7 +91,8 @@ ggsave("../output/plots/20191203/corrplot_alltraits_spearman.png")
 
 library(ggcorrplot)
 
-ggcorrplot::ggcorrplot(cor(seedTraits, use = "complete.obs"), p.mat = cor_pmat(seedTraits, use = "complete.obs"), hc.order=TRUE, type='lower',lab=FALSE, sig.level=0.05,insig='blank')
+ggcorrplot::ggcorrplot(cor(allTraits, use = "complete.obs"), p.mat = cor_pmat(allTraits, use = "complete.obs"), hc.order=TRUE, type='lower',lab=FALSE, sig.level=0.05)
+
 
 ggcorrplot::ggcorrplot(cor(dplyr::select(allTraits, -Hymeno_n), use = "complete.obs"), p.mat = cor_pmat(allTraits, use = "complete.obs"), insig='blank',hc.order=TRUE, type='lower',lab=FALSE, sig.level=0.05)
 
