@@ -1,0 +1,87 @@
+---
+title: "glms for proportion abscised"
+author: "E.E. Jackson"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: pdf_document 
+---
+
+```{r, message=FALSE, warning=FALSE}
+rm(list = ls())
+require(tidyverse)
+require(lme4)
+library(knitr)
+library(report)
+opts_chunk$set(tidy.opts=list(width.cutoff=50),tidy=TRUE)
+```
+## Read dataset 
+
+```{r}
+
+fruitDat <- read.csv("../output/tables/cleanData.csv")
+dm <- read.csv("../output/tables/dispersalMode.csv")
+
+```
+
+## generalized linear models
+
+```{r}
+
+fruitDat %>%
+	mutate(seedpred_pres = factor(ifelse(seedpred_pres == 0, "No", "Yes"))) %>%
+	left_join(select(dm, dispersal_mode = bio, sp), by = "sp") -> fruitDat
+
+## maximal model ##
+
+fullmod <- 
+glm(cbind(abscised_seeds,viable_seeds) ~ seedpred_pres + log10(seed_dry) * height_avg + cvseed + log10(cofruit) + bcireproductive + endocarp_investment + dispersal_mode, data = na.omit(fruitDat), family = quasibinomial(link = logit))
+
+summary(fullmod)
+
+anova(fullmod,test="F")
+######################
+mod2 <- update(fullmod, ~ . - lifeform) # drop variable with lowest p value
+
+anova(fullmod,mod2,test="F") # is the new model better?
+# The simpler model is not significantly worse
+
+anova(mod2,test="F") # can we simplify further?
+
+mod3 <- update(mod2, ~ . - seedpred_pres)
+anova(fullmod,mod2,mod3,test="F")
+anova(mod3,test="F")
+
+mod4 <- update(mod3, ~ . - bcireproductive)
+anova(fullmod,mod2,mod3,mod4,test="F")
+anova(mod4,test="F")
+
+summary(mod4) # looks like this is our best 
+report(mod4) # this gives us a nice interpretation of the model output
+
+```
+
+## Generalized linear mixed models
+
+```{r}
+# read in the sp by year data
+fruitDatFull <- read.csv("../output/tables/fullCleanData.csv")
+
+fruitDatFull %>%
+	mutate(seedpred_pres = factor(ifelse(seedpred_pres == 0, "No", "Yes"))) %>%
+	left_join(select(dm, dispersal_mode = bio, sp), by = "sp") -> fruitDatFull
+
+# glmer won't take cbind, so we use weights= to weight by total_seeds.
+
+# to account for temporal pseudoreplication the random-effects formula needs to indicate that the year (a continuous random effect) represents pseudoreplication within each individual sp? so (year|sp)
+
+m1 <- lme4::glmer(proportion_abscised ~ seedpred_pres + (year|sp), family= binomial, data = fruitDatFull, weights = total_seeds)
+summary(m1)
+
+# model won't converge
+
+# try model based on data with means across years
+# 1 explanatory variable and 1 random effect
+
+m2 <- lme4::glmer(proportion_abscised ~ seedpred_pres + (1|sp), family= binomial, data = fruitDat, weights = total_seeds)
+summary(m2) #effect of seedpredationrate is significatly positive but very small
+
+```

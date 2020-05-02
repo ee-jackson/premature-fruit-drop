@@ -1,0 +1,147 @@
+---
+title: "Seed predators and premature fruit drop"
+author: "E.E. Jackson"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: pdf_document 
+	theme: sandstone
+---
+```{r, message=FALSE, warning=FALSE}
+rm(list = ls())
+require(tidyverse)
+require(lme4)
+library(knitr)
+require(phylolm)
+require(pez)
+require(phyr)
+opts_chunk$set(tidy.opts=list(width.cutoff=60),tidy=TRUE)
+theme_set(theme_bw())
+```
+Utility functions coef(), fitted(), residuals(), summary(), plot(), predict() are very handy and should be used over manual access tricks
+
+## Read dataset 
+
+```{r}
+
+fruitDat <- read.csv("../output/tables/cleanData.csv")
+
+```
+
+## additive glm with all traits
+
+```{r}
+
+## maximal model ##
+
+fullmod <- 
+glm(cbind(abscised_seeds,viable_seeds) ~ seedpredationrate + seed_dry + height_avg + cvseed + cofruit + bcireproductive + endocarp_investment, data = fruitDat, family = binomial(logit), na.action = na.omit)
+
+summary(fullmod)
+```
+## AIC-based backward selection ##
+```{r}
+## AIC-based backward selection ##
+
+mod1<-step(fullmod)
+
+summary(mod1) # model selected using AIC is the same as the full model
+
+```
+## F-test-based backward selection ##
+```{r}
+
+drop1(fullmod, test = "F")
+drop1(update(fullmod, ~ . -seed_dry), test = "F")
+drop1(update(fullmod, ~ . -seed_dry -cvseed), test = "F")
+
+summary(update(fullmod, ~ . -seed_dry -cvseed))
+
+```
+
+## interactions
+```{r}
+
+fullmodint <- 
+glm(cbind(abscised_seeds,viable_seeds) ~ seedpredationrate * seed_dry * height_avg * cvseed * cofruit * bcireproductive * endocarp_investment, data = fruitDat, family = binomial)
+
+summary(fullmodint)
+
+
+modint1<-step(fullmodint, trace=FALSE)
+
+summary(modint1)
+
+modint2 <- 
+glm(cbind(abscised_seeds,viable_seeds) ~ seedpredationrate:seed_dry:cvseed:bcireproductive + height_avg + cofruit + endocarp_investment, data = fruitDat, family = binomial)
+
+summary(modint2)
+
+anova(modint2, mod1, test="Chi")
+
+fruitDat <- subset(fruitDat, select=c(sp,viable_seeds, abscised_seeds, seedpredationrate, seed_dry, height_avg, cvseed, cofruit, bcireproductive, endocarp_investment,plant_species19))
+
+```
+## phylogenetic glms - trialing different packages
+```{r}
+
+
+fruitDat$taxa <- as.character(fruitDat$taxa)
+
+mf = model.frame(abscised_seeds ~ seedpredationrate + seed_dry + height_avg + cvseed + cofruit + bcireproductive + endocarp_investment, data=fruitDat)
+# model.frame removes rows with missing data, converts factors to dummy variables, etc.
+taxa_without_data = setdiff(phylo$tip.label, rownames(fruitDat))
+
+tre2 = phylo # good if there are no missing data
+if (length(taxa_without_data)>0) {
+  tre2 = drop.tip(phylo, taxa_without_data) # drop taxa with missing data from the tree
+}
+
+row.names(fruitDat) <- fruitDat$taxa
+fruitDat <- subset(fruitDat, select=c(abscised_seeds:endocarp_investment))
+
+# has to be binary - won't take cbind
+phylolm::phyloglm(cbind(abscised_seeds,viable_seeds) ~ seedpredationrate + seed_dry + height_avg + cvseed + cofruit + bcireproductive + endocarp_investment, phy = phylo, data =fruitDat, method = "logistic_IG10", boot = 100)
+
+row.names(fruitDat) <- fruitDat$taxa
+fruitDat <- subset(fruitDat, select=c(abscised_seeds:endocarp_investment))
+
+compCom <- comparative.comm(compDat$phy, compDat$vcv, traits = compDat$data, warn = TRUE)
+
+# need a site for this one - geared towards community data
+pez::communityPGLMM(cbind(abscised_seeds,viable_seeds) ~ seedpredationrate + seed_dry + height_avg + cvseed + cofruit + bcireproductive + endocarp_investment, data = as.data.frame.comparative.comm(compCom), family = "binomial", sp=as.factor(fruitDat$taxa), site=NULL)
+
+### try using this with full dataset then can add sp and year as random effects ###
+phyr::pglmm(formula = cbind(abscised_seeds,viable_seeds) ~ seedpredationrate + seed_hdry + height_avg + cvseed + cofruit + bcireproductive + endocarp_investment + (1|sp), data= fruitDat, family = "binomial")
+
+```
+
+```{r}
+fruitDat.y <- read.csv("../output/tables/fullCleanData.csv")
+
+mdl <- glm(cbind(abscised_seeds,viable_seeds) ~year,data=fruitDat.y,family = quasibinomial)
+summary(mdl)
+
+
+phymod <- phyr::pglmm(formula = cbind(abscised_seeds,viable_seeds) ~ seedpredationrate + seed_dry + height_avg + cvseed + cofruit + bcireproductive + endocarp_investment + (1|sp/year), data= fruitDat.y, family = "binomial")
+
+pglmm(cbind(yes, no) ~ 1 + x, data = dat, family = 'binomial')
+
+# data needs to be a matrix?
+
+summary(phymod)
+
+#####
+
+ggplot(subset(fruitDat.y, year=="LUE1"), aes(x=year, y=proportion_abscised)) + 
+    geom_point(size=3) +
+    geom_line() +
+	scale_y_continuous(expand= c(0, 0)) +
+	scale_x_continuous(expand= c(0, 0)) +
+	ylab("Proportion of seeds abscised")+
+	theme_bw(base_size = 60) +
+	ggtitle(label= "LUE1")
+ggsave("../output/plots/prematureFruitDrop/LUE1.png", dpi="print")
+
+
+
+
+```
