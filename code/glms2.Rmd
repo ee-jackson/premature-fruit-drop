@@ -65,15 +65,17 @@ report(mod4) # this gives us a nice interpretation of the model output
 # read in the sp by year data
 fruitDatFull <- read.csv("../output/tables/fullCleanData.csv")
 
+
 fruitDatFull %>%
 	mutate(seedpred_pres = factor(ifelse(seedpred_pres == 0, "No", "Yes"))) %>%
 	left_join(select(dm, dispersal_mode = bio, sp), by = "sp") -> fruitDatFull
+##
 
 # glmer won't take cbind, so we use weights= to weight by total_seeds.
 
 # to account for temporal pseudoreplication the random-effects formula needs to indicate that the year (a continuous random effect) represents pseudoreplication within each individual sp? so (year|sp)
 
-m1 <- lme4::glmer(proportion_abscised ~ seedpred_pres + (year|sp), family= binomial, data = fruitDatFull, weights = total_seeds)
+m1 <- lme4::glmer(cbind(abscised_seeds,viable_seeds) ~ seedpred_pres + (year|sp), family= binomial, data = fruitDatFull)
 summary(m1)
 
 # model won't converge
@@ -81,7 +83,9 @@ summary(m1)
 # try model based on data with means across years
 # 1 explanatory variable and 1 random effect
 
-m2 <- lme4::glmer(proportion_abscised ~ seedpred_pres + (1|sp), family= binomial, data = fruitDat, weights = total_seeds)
-summary(m2) #effect of seedpredationrate is significatly positive but very small
+m2 <- lme4::glmer(cbind(abscised_seeds,viable_seeds) ~ seedpred_pres + (1|sp), family= binomial, data = fruitDat)
+summary(m2) #effect of seedpredationrate is significatly positive but very small, R2 = 0.49
+
+
 
 ```

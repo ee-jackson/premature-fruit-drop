@@ -1,0 +1,295 @@
+---
+title: "glmms for proportion abscised and plant traits"
+author: "E.E. Jackson"
+date: '`r format(Sys.time(), "%d %B, %Y")`'
+output: pdf_document 
+---
+
+```{r, message=FALSE, warning=FALSE}
+rm(list = ls())
+require(tidyverse)
+require(lme4)
+library(knitr)
+library(report)
+require(MuMIn)
+require(ggpubr)
+require(MASS)
+require(broom)
+require(patchwork)
+library(DHARMa)
+require(glmmTMB)
+opts_chunk$set(tidy.opts=list(width.cutoff=50),tidy=TRUE,cache.lazy = FALSE,cache = TRUE)
+```
+
+## Read dataset 
+
+```{r}
+fruitDat <- read.csv("../output/tables/fullCleanData.csv")
+dm <- read.csv("../output/tables/dispersalMode.csv")
+
+
+fruitDat$seed_dry_log <- log10(fruitDat$seed_dry)
+fruitDat$bcireproductive_log <- log10(fruitDat$bcireproductive)
+#round these to integers so that DHARMa will take them
+fruitDat$abscised_seeds <- round(fruitDat$abscised_seeds)
+fruitDat$viable_seeds <- round(fruitDat$viable_seeds)
+
+
+set.seed(123)
+
+```
+
+## function to test for overdispersion
+
+```{r, message=TRUE, warning=FALSE}
+overdisp_fun <- function(model) {
+    rdf <- df.residual(model)
+    rp <- residuals(model,type="pearson")
+    Pearson.chisq <- sum(rp^2)
+    prat <- Pearson.chisq/rdf
+    pval <- pchisq(Pearson.chisq, df=rdf, lower.tail=FALSE)
+    c(chisq=Pearson.chisq,ratio=prat,rdf=rdf,p=pval)
+}
+```
+
+## mixed effect models
+
+```{r, message=TRUE, warning=FALSE}
+# write a loop to run all the univariate models
+
+#scale and centre continuous variables
+fruitDat.CS <- transform(fruitDat, 
+    height_avg=scale(height_avg),
+    cvseed=scale(cvseed),
+    cofruit=scale(cofruit),
+    endocarp_investment=scale(endocarp_investment),
+    seed_dry_log=scale(seed_dry_log),
+    bcireproductive_log=scale(bcireproductive_log)
+    )
+
+fruitDat <- transform(fruitDat, 
+    cofruit=scale(cofruit)
+    )
+
+vars = names(fruitDat)[c(14,15,16,18,22,26,27)]
+
+models <- lapply(setNames(vars, vars), function(var) {
+	formula = paste("cbind(abscised_seeds,viable_seeds)~", var, "+ (1|year) + (1|sp)")
+	glmer(formula, family = binomial(logit), data=fruitDat)
+	}
+)
+
+
+sapply(models, overdisp_fun) # check for overdispersion, want to see the ratio is not over 1
+sapply(models, r.squaredGLMM) # calcluate R squared, row 1 is marginal (fixed effects alone), 3 is conditional 
+
+# compute per-model statistics
+stats <- purrr::map_dfr(models, broom::glance, conf.int = TRUE, .id = "vars") 
+write.csv(stats, "../output/tables/allGLMMstats.csv")
+# compute statistics about each of the coefficients for each model
+res_anova <- purrr::map_dfr(models, broom::tidy, conf.int = TRUE, .id = "vars")
+res_anova
+write.csv(res_anova, "../output/tables/allGLMMcoefNEW.csv")
+# we are interested in rows where term = the variable
+results <- res_anova[!grepl("(Intercept)", res_anova$term),]
+results
+
+```
+
+## Create and examine residual plots for each model
+
+```{r, fig_width=6, fig_height=4, warning=FALSE}
+
+resid_plots <- function(model, modelname) {
+     output <- DHARMa::simulateResiduals(fittedModel = model)
+     
+     plot(output, sub=modelname) 
+}
+
+resid_plots(model = models[[1]], modelname = names(models)[1])
+
+residplots <- imap(models, resid_plots)
+
+pdf("all_residualplots_GLMM.pdf",width=10, height=7)
+residplots
+dev.off()
+
+plotResiduals(modelssim$height_avg, na.omit(fruitDat$height_avg), quantreg = T)
+
+
+## conduct tests on simulated residuals
+modelssim <-lapply(models, simulateResiduals)
+lapply(modelssim, testZeroInflation) # a value > 1 means that it has more zeros than expected (aka zero-inflation)
+lapply(modelssim, testDispersion) # test for over/undersdispersion
+
+###### re fit models for overdispersion
+
+
+modelz <- lapply(setNames(vars, vars), function(var) {
+    formula <- paste0("cbind(abscised_seeds,viable_seeds)~", var, "+ (1|sp) + (1|year)")
+    glmmTMB(formula=eval(parse(text=formula)), family= c(family="betabinomial",link="logit"), data = fruitDat)
+    }
+)
+
+residplotz <- imap(modelz, resid_plots)
+
+    pdf("all_residualplots_zinflation.pdf",width=10, height=7)
+    residplotz
+    dev.off()
+
+modelzsim <-lapply(modelz, simulateResiduals)
+lapply(modelzsim, testZeroInflation) 
+lapply(modelzsim, testDispersion)
+
+# test if the fit is better
+sapply(models, AIC)
+sapply(modelz, AIC)
+
+# get summary
+
+summary_tables <- function (model, modelname) {
+    coef(summary(modelq[[modelname]]))
+}
+
+imap(modelq, summary_tables)
+
+# quasi
+modelq <- lapply(setNames(vars, vars), function(var) {
+    formula <- paste0("cbind(abscised_seeds,viable_seeds)~", var)
+    MASS::glmmPQL(eval(parse(text=formula)), random = list(~1|sp, ~1|year), family= quasibinomial(link=logit), data = fruitDat)
+    }
+)
+
+
+    gh<-MASS::glmmPQL(cbind(abscised_seeds,viable_seeds)~seedpred_pres, random = list(~1|sp, ~1|year), family= quasibinomial(link=logit), data = fruitDat)
+
+
+summary(modelq)
+
+```
+
+## plot final models
+
+```{r, fig_width=6, fig_height=4, warning=FALSE}
+ # need to remove these two for plotting
+modelz$seedpred_pres <- NULL
+
+
+labs <- c(
+            height_avg = "Tree height",
+            cvseed = "Interannual crop size variation",
+            cofruit = "Overlap in fruit production",
+            bcireproductive_log = "Local abundance (log)",
+            endocarp_investment = "Endocarp investment",
+            seed_dry_log ="Seed dry mass (log)",
+            proportion_abscised = "Proportion of seeds abscised")
+
+
+get_unscaled_pred <- function (model, modelname) {
+    fruitDat %>%
+        dplyr::select(modelname) %>%
+        drop_na() %>%
+        mutate(fit=predict(model, type="response"))%>%
+        mutate(unscaled_fit= fit * sd(eval(parse(text=modelname))) + mean(eval(parse(text=modelname))))
+}
+
+get_unscaled_pred <- function (model, modelname) {
+    fruitDat.CS %>%
+        dplyr::select(modelname) %>%
+        drop_na() %>%
+        mutate(fit=predict(model, type="response"))%>%
+        mutate(unscaled_fit= fit * attr(eval(parse(text=modelname)), 'scaled:scale') + attr(eval(parse(text=modelname))), 'scaled:center')
+}
+
+
+test<-imap(modelz, get_unscaled_pred)
+
+Unscaled_Pred <- predict(modelz$height_avg, fruitDat) * sd(fruitDat$modelname) + mean(fruitDat$modelname)
+
+    output <- as.data.frame(predict(model, type='response') * sd(na.omit(subset(fruitDat, select=modelname))) + mean(na.omit(subset(fruitDat, select=modelname))))
+
+output = as.data.frame(effects::effect(term= height_avg, mod= modelz$height_avg,xlevels=30))
+
+fits <- get_unscaled_pred(model, modelname)
+
+
+testdat <- data.frame(dplyr::select(fruitDat, height_avg, sp, year)%>%drop_na())
+
+fits <- data.frame(predict(modelz$height_avg, newdata=testdat,se=TRUE, type="response"))
+
+plot_data_var <- function (model, modelname, labs) {
+    fits <- predict(model, type='response', se=T)
+    output <- data.frame(fits) %>% 
+        mutate(lower = fit - 1.96*se.fit,
+         upper = fit + 1.96*se.fit)
+    ggplot() +
+        geom_point(data= fruitDat, aes_string(x = modelname, y = "proportion_abscised"), size=0.5) +
+        geom_line(data= output, aes_string(x= modelname, y = "fit"), colour= "blue") +
+        geom_ribbon(data= output, aes_string(x = modelname, ymin="lower", ymax="upper"), alpha= 0.1, fill="blue") +
+        xlab(labs[modelname]) +
+        ylab("Proportion of seeds abscised") +
+        theme_bw(base_size=20)
+}
+
+myplots <- imap(modelq, plot_data_var, labs)
+
+ggpubr::ggarrange(plotlist = myplots)
+
+#ggsave("../output/plots/glmms_agh.png", dpi="retina")
+
+#for glmmTMB try
+require(ggeffects)
+pr<-ggpredict(modelq$height_avg, "height_avg [all]", type = "sim")
+plot(pr)
+#or
+ggplot() +
+  geom_line(data=pr, aes(x=x, y=predicted)) +
+  geom_ribbon(data=pr, aes(x=x, y=predicted, ymin = conf.low, ymax = conf.high), alpha = .1) +
+  geom_point(data= fruitDat, aes(x = height_avg, y = proportion_abscised), size=0.5) +
+  theme_bw()
+```
+
+## plot box plots for categorical variables
+```{r}
+fruitDat %>% 
+    drop_na(dispersal_mode) %>%
+    ggplot(., aes(y=proportion_abscised, group=as.factor(dispersal_mode), x=as.factor(dispersal_mode))) + 
+        geom_boxplot(alpha= 0.8,position = position_dodge2(preserve = "single"), width=0.3, size=1)+
+        geom_jitter(shape=16, position=position_jitter(0.15), alpha=0.5, size=4) +
+        theme(legend.position= "none") +
+        xlab("Dispersal mode") +
+        ylab("Proportion of seeds abscised") +
+        scale_y_continuous(limits=c(0.0,1.0)) +
+        theme_pubr(base_size = 40) -> p1
+
+fruitDat %>% 
+    drop_na(seedpred_pres) %>%
+    ggplot(., aes(y=proportion_abscised, group=as.factor(seedpred_pres), x=as.factor(seedpred_pres))) + 
+        geom_boxplot(alpha= 0.8,position = position_dodge2(preserve = "single"), width=0.3, size=1)+
+        geom_jitter(shape=16, position=position_jitter(0.15), alpha=0.5, size=4) +
+        theme(legend.position= "none") +
+        xlab("Presence of seed predator") +
+        ylab("Proportion of seeds abscised") +
+        scale_y_continuous(limits=c(0.0,1.0)) +
+        theme_pubr(base_size = 40) -> p2
+
+fruitDat %>%
+    select(c("sp", "hymeno_pres", "lepid_pres", "coleo_pres", "proportion_abscised")) %>%
+    rename(coleoptera=coleo_pres, hymenoptera = hymeno_pres, lepidoptera = lepid_pres) %>%
+    melt(id.vars=c("sp", "proportion_abscised"), measure.vars=c("coleoptera", "hymenoptera", "lepidoptera")) %>%
+    rename(predator=variable, presence=value) %>% 
+    drop_na(presence) %>%
+    mutate(presence = factor(ifelse(presence == 0, "no", "yes"))) %>%
+        ggplot(., aes(y=proportion_abscised, group=as.factor(presence), x=as.factor(presence))) + 
+            facet_wrap(~predator) +
+            geom_boxplot(alpha= 0.8,position = position_dodge2(preserve = "single"), width=0.4, size=1)+
+            geom_jitter(shape=16, position=position_jitter(0.2), alpha=0.5, size=3) +
+            theme(legend.position= "none") +
+            xlab("Presence of seed predator") +
+            ylab("Proportion of seeds abscised") +
+            scale_y_continuous(limits=c(0.0,1.0)) +
+            theme_pubr(base_size = 40) -> p3
+
+(p1+plot_spacer())/(p2+p3) + plot_annotation(tag_levels = 'A')
+#ggsave("../output/plots/traitBoxplotsSmaller.png", dpi="screen")
+```
