@@ -1,0 +1,77 @@
+\documentclass[12pt,a4]{RDGThesis}
+% can set margins
+\usepackage[left=3.8cm, right=2.5cm, top=3cm, bottom=3cm]{geometry}
+
+%lists package and bullet formats
+\usepackage{paralist}
+\usepackage{bbding}
+%enhanced graphics support
+\usepackage{graphicx}
+%pageheaders and footers in LaTeX2e
+\usepackage{fancyhdr}
+%footnote options
+\usepackage{footmisc}
+%source code printer
+\usepackage{listings}
+%read/write verbatim TeX code
+\usepackage{fancyvrb}
+% Comments package
+\usepackage{comment}
+\usepackage{floatrow}
+\floatsetup[table]{capposition=top}
+\usepackage{longtable}
+\usepackage{rotating}
+\usepackage{wrapfig, framed, caption}
+\usepackage{gensymb}
+\usepackage{multirow}
+\usepackage{textgreek}
+\usepackage{parskip}
+
+%THIS IS WHERE YOU ENTER THE TITLE OF YOUR THESIS
+\title{Patterns of premature fruit drop in tropical forest plants}
+
+%THIS IS WHERE YOU ENTER YOUR NAME
+\author{Eleanor E Jackson}
+
+%THIS IS WHERE YOU ENTER THE NAME OF YOUR DEGREE
+\fac{QMEE mini-project}
+
+%THIS IS WHERE YOU ENTER THE DATE YOU SUBMITTED YOUR THESIS OR DISSERTATION
+\date{June 2020}
+
+%no paragraph indentation
+\setlength\parindent{0pt}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{notation}{Notation}[section]
+
+\usepackage[backend=biber, style=authoryear-comp, uniquename=false, uniquelist=false]{biblatex}
+\addbibresource{references.bib}
+
+\begin{document} %
+\rdgtitlepage %
+%set the hierarchical drilldown to 3
+\setcounter{secnumdepth}{3} \setcounter{tocdepth}{3}
+%change single space to double space
+\doublespacing
+%set pagination to Arabic
+\pagenumbering{arabic} 
+% style for fancyheader
+\setlength{\headheight}{15.2pt}
+\pagestyle{fancy}
+\lhead[Page \thepage]{Section \thesection} 
+\rhead[Section \thesection]{Page \thepage}
+% \lfoot[<lf-even>]{<lf-odd>} 	\cfoot[<cf-even>]{<cf-odd>} 	\rfoot[<rf-even>]{<rf-odd>}
+
+%can write an intro here
+
+%include the other .tex files 
+\input{chapter1}
+%\input{chapter2}
+%\input{chapter3}
+% \input{chapter4}
+\input{bibliography}
+
+\end{document}
+
