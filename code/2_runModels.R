@@ -31,20 +31,21 @@ fruit_traits$sp4 <- as.factor(fruit_traits$sp4)
 fruit_traits <- subset(fruit_traits, sum_parts >= 10)
 
 # transform
-fruit_traits <- mutate(fruit_traits, 
-    cofruit_cs = scale(cofruit),
+fruit_traits %>%
+    mutate(cofruit_cs = scale(cofruit),
     height_avg_cs = scale(height_avg),
     cvseed_cs = scale(cvseed),
     endocarp_investment_cs = scale(endocarp_investment),
     seed_dry_log = log(seed_dry),
-    bcireproductive_log = log(bcireproductive)
-    )
-
+    bcireproductive_log = log(bcireproductive)) %>%
+    mutate(seed_dry_log_cs = scale(seed_dry_log),
+    bcireproductive_log_cs = scale(bcireproductive_log)) -> fruit_traits
+    
 ## fit models #################################################################
 
 # select variables to loop over
 vars <- c("height_avg_cs","cvseed_cs","cofruit_cs","endocarp_investment_cs",
-        "seedpred_pres","seed_dry_log","bcireproductive_log")
+        "seedpred_pres","seed_dry_log_cs","bcireproductive_log_cs")
 
 # loop model fitting over all the traits
 models <- lapply(setNames(vars, vars), function(var) {
@@ -58,15 +59,13 @@ models <- lapply(setNames(vars, vars), function(var) {
 lapply(models, summary)
 
 # compute per-model statistics
-stats <- purrr::map_dfr(models, broom::glance, conf.int = TRUE, .id = "vars") 
-
-write.csv(stats, "../output/tables/allGLMMstats.csv")
+purrr::map_dfr(models, broom::glance, conf.int = TRUE, .id = "vars") 
 
 # compute statistics about each of the coefficients for each model
 res_anova <- purrr::map_dfr(models, broom::tidy, 
 							conf.int = TRUE, .id = "vars")
 
-write.csv(res_anova, "../output/tables/allGLMMcoef.csv")
+write.csv(res_anova, "../output/figures/allGLMMcoef.csv")
 
 # remove rows with intercept so we only keep coefs for the variables
 results <- res_anova[!grepl("(Intercept)", res_anova$term),]
@@ -106,9 +105,9 @@ labs <- c(
             height_avg_cs = "Tree height (m)",
             cvseed_cs = "Interannual crop size variation",
             cofruit_cs = "Overlap in fruit production",
-            bcireproductive_log = "log Local abundance",
+            bcireproductive_log_cs = "log Local abundance",
             endocarp_investment_cs = "Endocarp investment (g)",
-            seed_dry_log ="log Seed dry mass (g)",
+            seed_dry_log_cs ="log Seed dry mass (g)",
             proportion_abscised = "Proportion of seeds abscised",
         	seedpred_pres = "Presence of seed predator")
 
