@@ -30,9 +30,9 @@ fruit_traits %>%
 	    geom_histogram(aes(y=..count..), binwidth=.05, colour="black", fill="grey", alpha=.2, size=0.25, boundary=0) +
 		scale_y_continuous(expand= c(0, 0), lim =c(0,45)) +
 		scale_x_continuous(expand= c(0, 0)) +
-		xlab("mean proportion of seeds prematurely abscised") +
-		ylab("count of plant species") +
-		theme_bw(base_size = 8) +
+		xlab("Mean proportion of seeds prematurely abscised") +
+		ylab("Count of plant species") +
+		theme_classic(base_size = 8) +
 		theme(plot.margin = margin(2, 3, 2, 2, "mm") ) 
 
 ggsave("../output/figures/hist.tiff", 
@@ -40,7 +40,7 @@ ggsave("../output/figures/hist.tiff",
 
 ### correlation matrix of plant traits ########################################
 
-# log these two 
+# log these two as that is how we model them
 
 fruit_traits$seed_dry_log <- log(fruit_traits$seed_dry)
 fruit_traits$bcireproductive_log <- log(fruit_traits$bcireproductive)

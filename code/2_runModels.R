@@ -116,11 +116,11 @@ ggplot(results, aes(x = vars, y= estimate)) +
 	geom_pointrange(aes(ymin = conf.low, ymax = conf.high), 
         size = 0.25, fatten = 1)  +
 	geom_hline(yintercept = 0, linetype = 2, size = 0.25)  +
-    labs(y = "Estimate ± CI [95%]", x = "Plant trait") +
+    labs(y = "Estimate ± CI [95%]", x = "") +
     scale_x_discrete(labels = labs) +
     scale_y_continuous(limits = c(-0.75, 2)) +
     coord_flip() +
-    theme_bw(base_size = 7)
+    theme_classic(base_size = 8)
 
-ggsave("../output/figures/effectsizes.tiff", 
+ggsave("../output/figures/fig2.tiff", 
     device = "tiff", dpi = 350, width = 80, height = 80, units = "mm") 

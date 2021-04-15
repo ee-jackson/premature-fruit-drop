@@ -16,6 +16,7 @@ PhyloExtraSpec <- read.tree('../data/raw/PhyloExtraSpec.tree')
 load("../data/clean/fruit_traits.RData")
 
 fruit_traits <- subset(fruit_traits, sum_parts >= 10)
+
 # mean proportion_abscised across yrs, 1 value per sp
 fruit_traits %>%
     group_by(sp4) %>% 
@@ -70,7 +71,7 @@ phytools::phylosig(x=p_a,tree=phylo, test=TRUE, nsim = 1000, method="lambda")
 
 # plot map of mean proportion abscised across the tree
 obj <- phytools::contMap(phylo, p_a, plot=F,legend=1.5) ->obj
-obj <- setMap(obj,colors=c("#FDE725FF", "#21908CFF", "#440154FF"))
+obj <- setMap(obj,colors=c("#F0F921FF", "#CC4678FF", "#0D0887FF"))
 plot(obj, fsize=c(0.5,1), lwd=3, sig=1, type="fan")
 
 tiff(file = "../output/figures/contMap4.tiff",  
