@@ -1,26 +1,26 @@
 #!/usr/bin/env Rscript
 
 ## Author: E E Jackson, eleanor.elizabeth.j@gmail.com
-## Script: prematureFruitDrop.R
-## Desc: descriptive plots of premature fruit drop at BCI
+## Script: 1-plot-proportion-abscised.R
+## Desc: plot the histogram and trait correlation matrix
 ## Date: March 2020
 
 rm(list = ls())
 
-### load packages #############################################################
+# Load packages ---------------------------
 
 library("tidyverse")
 library("reshape2")
 library("ggcorrplot")
 
-### read in data ##############################################################
+# Load data ---------------------------
 
 load("../data/clean/fruit_traits.RData")
 
 # only include sp x year points if there were at least 10 parts found
 fruit_traits <- subset(fruit_traits, sum_parts >= 10)
 
-### histogram #################################################################
+# Plot histogram ---------------------------
 
 fruit_traits %>%
 	select("sp4","year", "proportion_abscised") %>%
@@ -38,10 +38,9 @@ fruit_traits %>%
 ggsave("../output/figures/hist.tiff", 
     device = "tiff", dpi = 350, width = 80, height = 60, units = "mm") 
 
-### correlation matrix of plant traits ########################################
+# Plot correlation matrix ---------------------------
 
 # log these two as that is how we model them
-
 fruit_traits$seed_dry_log <- log(fruit_traits$seed_dry)
 fruit_traits$bcireproductive_log <- log(fruit_traits$bcireproductive)
 

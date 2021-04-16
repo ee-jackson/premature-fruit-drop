@@ -1,24 +1,26 @@
 #!/usr/bin/env Rscript
 
 ## Author: E E Jackson, eleanor.elizabeth.j@gmail.com
-## Script: traits.R
-## Desc: GLMMs for proportion abscised and plant traits
+## Script: 2-fit-models.R
+## Desc: fit GLMMs for proportion abscised and plant traits
 ## Date: June 2020
 
-### load packages #############################################################
+# Load packages ---------------------------
 
 library("tidyverse")
 library("lme4")
 library("DHARMa")
 library("broom.mixed")
 
-### read in and format data ###################################################
+# Load data ---------------------------
 
 rm(list = ls())
 
 set.seed(123)
 
 load("../data/clean/fruit_traits.RData")
+
+# Clean up data ---------------------------
 
 # round number of seeds to integers
 fruit_traits$abscised_seeds <- round(fruit_traits$abscised_seeds)
@@ -40,8 +42,8 @@ fruit_traits %>%
     bcireproductive_log = log(bcireproductive)) %>%
     mutate(seed_dry_log_cs = scale(seed_dry_log),
     bcireproductive_log_cs = scale(bcireproductive_log)) -> fruit_traits
-    
-## fit models #################################################################
+
+# Fit models ---------------------------
 
 # select variables to loop over
 vars <- c("height_avg_cs","cvseed_cs","cofruit_cs","endocarp_investment_cs",
@@ -71,7 +73,7 @@ write.csv(res_anova, "../output/figures/allGLMMcoef.csv")
 results <- res_anova[!grepl("(Intercept)", res_anova$term),]
 results # we will use this for plotting
 
-### model diagnostics #########################################################
+# Do model diagnostics ---------------------------
 
 # a function to create simulated residuals for each model fit
 resid_plots <- function(model, modelname) {
@@ -98,7 +100,7 @@ lapply(modelssim, testZeroInflation)
 # test for over/undersdispersion
 lapply(modelssim, testDispersion) 
 
-### plot models ###############################################################
+# Plot models ---------------------------
 
 # create labels
 labs <- c(

@@ -1,17 +1,17 @@
 #!/usr/bin/env Rscript
 
 ## Author: E E Jackson, eleanor.elizabeth.j@gmail.com
-## Script: calculateProportionAbscised.R
+## Script: 0-calculate-proportion-abscised.R
 ## Desc: calculate proportion of prematurely abscised seeds, per year, per sp
 ## Date: November 2019
 
 rm(list = ls())
 
-### load packages #############################################################
+# Load packages ---------------------------
 
 library("tidyverse")
 
-### read in and clean up data #################################################
+# Load data ---------------------------
 
 # seed rain data
 seed_rain <- read.table("../data/raw/BCI_TRAP200_20190215_spcorrected.txt", 
@@ -25,6 +25,7 @@ seed_trait <- read.csv("../data/raw/20120227_seedsMassForTraits.csv",
 plant_trait <- read.csv("../data/raw/TidyTrait.csv", 
 	header=TRUE, stringsAsFactors = FALSE)
 
+# Clean up data ---------------------------
 
 # convert fetcha to class Date
 seed_rain$fecha <- as.character(seed_rain$fecha)
@@ -55,7 +56,7 @@ seed_dat <- seed_dat %>%
 
 glimpse(seed_dat)
 
-## Calculate proportion of seeds absicsed  ####################################
+# Calculate proportion of seeds absicsed ---------------------------
 
 # create a df that sums quantity of parts by year, sp and part
 abs_dat <- seed_dat %>% 
@@ -105,7 +106,7 @@ sum_parts_dat <- abs_dat %>%
 
 fruit_dat <- left_join(prop_dat, sum_parts_dat, by = c("SP4", "year"))
 
-## add plant traits to the dataset ############################################
+# Add plant traits to the dataset ---------------------------
 
 # select columns and only keep if n=>200
 plant_trait %>%
