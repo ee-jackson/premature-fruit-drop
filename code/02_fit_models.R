@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
 ## Author: E E Jackson, eleanor.elizabeth.j@gmail.com
-## Script: 2-fit-models.R
+## Script: 2_fit_models.R
 ## Desc: fit GLMMs for proportion abscised and plant traits
 ## Date: June 2020
 
@@ -120,7 +120,7 @@ ggplot(results, aes(x = vars, y= estimate)) +
 	geom_hline(yintercept = 0, linetype = 2, size = 0.25)  +
     labs(y = "Estimate ± CI [95%]", x = "") +
     scale_x_discrete(labels = labs) +
-    scale_y_continuous(limits = c(-0.75, 2)) +
+    scale_y_continuous(limits = c(-1, 2)) +
     coord_flip() +
     theme_classic(base_size = 8)
 

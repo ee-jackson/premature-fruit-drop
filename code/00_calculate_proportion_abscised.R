@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
 ## Author: E E Jackson, eleanor.elizabeth.j@gmail.com
-## Script: 0-calculate-proportion-abscised.R
+## Script: 0_calculate_proportion_abscised.R
 ## Desc: calculate proportion of prematurely abscised seeds, per year, per sp
 ## Date: November 2019
 
