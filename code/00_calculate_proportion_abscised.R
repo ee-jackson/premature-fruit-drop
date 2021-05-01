@@ -1,29 +1,28 @@
 #!/usr/bin/env Rscript
 
 ## Author: E E Jackson, eleanor.elizabeth.j@gmail.com
-## Script: 0_calculate_proportion_abscised.R
+## Script: 00_calculate-proportion-abscised.R
 ## Desc: calculate proportion of prematurely abscised seeds, per year, per sp
 ## Date: November 2019
 
-rm(list = ls())
-
 # Load packages ---------------------------
 
-library("tidyverse")
+library("groundhog")
+groundhog_day = "2021-04-29"
+groundhog.library("tidyverse", groundhog_day)
+groundhog.library("here", groundhog_day)
 
 # Load data ---------------------------
 
 # seed rain data
-seed_rain <- read.table("../data/raw/BCI_TRAP200_20190215_spcorrected.txt", 
-	header=TRUE, stringsAsFactors = FALSE)
-
+seed_rain <- read.table(here::here("data", "raw", "BCI_TRAP200_20190215_spcorrected.txt"),
+                        header=TRUE, stringsAsFactors = FALSE)
 # seed traits
-seed_trait <- read.csv("../data/raw/20120227_seedsMassForTraits.csv", 
-	header=TRUE, stringsAsFactors = FALSE)
-
+seed_trait <- read.csv(here::here("data", "raw","20120227_seedsMassForTraits.csv"),
+                       header=TRUE, stringsAsFactors = FALSE)
 # plant traits
-plant_trait <- read.csv("../data/raw/TidyTrait.csv", 
-	header=TRUE, stringsAsFactors = FALSE)
+plant_trait <- read.csv(here::here("data", "raw","TidyTrait.csv"),
+                       header=TRUE, stringsAsFactors = FALSE)
 
 # Clean up data ---------------------------
 
@@ -51,7 +50,7 @@ seed_dat <- subset(seed_dat,LIFEFORM== "LIANA"|LIFEFORM== "MIDSTORY"
 	|LIFEFORM== "SHRUB"|LIFEFORM== "TREE"|LIFEFORM=="UNDERSTORY")
 
 # remove sp where there is no data for N_SEEDFULL (mean # of seeds per fruit)
-seed_dat <- seed_dat %>% 
+seed_dat <- seed_dat %>%
 	drop_na("N_SEEDFULL")
 
 glimpse(seed_dat)
@@ -59,17 +58,17 @@ glimpse(seed_dat)
 # Calculate proportion of seeds absicsed ---------------------------
 
 # create a df that sums quantity of parts by year, sp and part
-abs_dat <- seed_dat %>% 
+abs_dat <- seed_dat %>%
 	group_by(part, SP4, year, N_SEEDFULL, GENUS, SPECIES, LIFEFORM) %>%
 	summarise(quantity_sum= sum(quantity, na.rm = TRUE)) %>%
 	ungroup()
 
 # Calculate sum of viable seeds
 
-abs_dat_v <- subset(abs_dat, part== 1 | part== 2) %>% 
+abs_dat_v <- subset(abs_dat, part== 1 | part== 2) %>%
 	replace(., is.na(.), 0) %>%
-	rowwise() %>% 
-	mutate(viable_seeds = ifelse(part==1, quantity_sum*N_SEEDFULL, 
+	rowwise() %>%
+	mutate(viable_seeds = ifelse(part==1, quantity_sum*N_SEEDFULL,
 		quantity_sum)) %>%
 	ungroup() %>%
 	group_by(SP4, year, GENUS, SPECIES, LIFEFORM) %>%
@@ -78,9 +77,9 @@ abs_dat_v <- subset(abs_dat, part== 1 | part== 2) %>%
 
 # Calculate sum of abscised seeds
 
-abs_dat_a <- subset(abs_dat, part== 5) %>% 
+abs_dat_a <- subset(abs_dat, part== 5) %>%
 	replace(., is.na(.), 0) %>%
-	rowwise() %>% 
+	rowwise() %>%
 	mutate(abscised_seeds = quantity_sum*N_SEEDFULL) %>%
 	ungroup() %>%
 	group_by(SP4, year, GENUS, SPECIES, LIFEFORM) %>%
@@ -88,18 +87,18 @@ abs_dat_a <- subset(abs_dat, part== 5) %>%
 	ungroup()
 
 # join those 2 dfs
-prop_dat <- full_join(abs_dat_a, abs_dat_v, 
+prop_dat <- full_join(abs_dat_a, abs_dat_v,
 	by= c("SP4", "year", "GENUS", "SPECIES", "LIFEFORM"))
 
 # calculate proportion abscised
 prop_dat <- prop_dat %>%
 	replace(., is.na(.), 0) %>%
-	rowwise() %>% 
+	rowwise() %>%
 	mutate(total_seeds = sum(abscised_seeds, viable_seeds, na.rm = TRUE), proportion_abscised = abscised_seeds / total_seeds) %>%
 	ungroup()
 
-# create and add a column for the sum of parts found 
-sum_parts_dat <- abs_dat %>% 
+# create and add a column for the sum of parts found
+sum_parts_dat <- abs_dat %>%
 	group_by(SP4, year) %>%
 	summarise(sum_parts= sum(quantity_sum, na.rm = TRUE)) %>%
 	ungroup()
@@ -112,9 +111,9 @@ fruit_dat <- left_join(prop_dat, sum_parts_dat, by = c("SP4", "year"))
 plant_trait %>%
 	subset(TotUnits_collected >= 200) %>%
 	rename(SP4 = Codigo, SP6 = Code6) %>%
-	select(SP4, SP6, Plant_species19, Family, HEIGHT_AVG, seed_dry, 
-		cvseed,  CoFruit, BCIReproductive, Endocarp_investment, 
-		SeedPredationRate, SeedPred_n, SeedPred_pres, Coleo_pres, 
+	select(SP4, SP6, Plant_species19, Family, HEIGHT_AVG, seed_dry,
+		cvseed,  CoFruit, BCIReproductive, Endocarp_investment,
+		SeedPredationRate, SeedPred_n, SeedPred_pres, Coleo_pres,
 		Hymeno_pres, Lepid_pres) -> plant_trait
 
 # join
@@ -125,4 +124,4 @@ colnames(fruit_traits) <- tolower(colnames(fruit_traits))
 fruit_traits$lifeform <- str_to_title(fruit_traits$lifeform, locale = "en")
 fruit_traits$lifeform <- as.factor(fruit_traits$lifeform)
 
-save(fruit_traits, file = "../data/clean/fruit_traits.RData")
+save(fruit_traits, file = here::here("data", "clean", "fruit_traits.RData"))
