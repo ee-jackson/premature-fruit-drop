@@ -58,6 +58,8 @@ models <- lapply(setNames(vars, vars), function(var) {
 	}
 )
 
+save(models, file = here::here("output", "results", "model-fits.RData"))
+
 # look at the output
 lapply(models, summary)
 
@@ -68,7 +70,7 @@ purrr::map_dfr(models, broom::glance, conf.int = TRUE, .id = "vars")
 res_anova <- purrr::map_dfr(models, broom::tidy,
 							conf.int = TRUE, .id = "vars")
 
-write.csv(res_anova, here::here("output", "tables", "s2_efects.csv"))
+write.csv(res_anova, here::here("output", "results", "model-coefficients.csv"))
 
 # remove rows with intercept so we only keep coefs for the variables
 results <- res_anova[!grepl("(Intercept)", res_anova$term),]
@@ -87,7 +89,7 @@ resid_plots <- function(model, modelname) {
 resid_plots(model = models[[2]], modelname = names(models)[2])
 
 # loop through all model fits and print residual plots in a pdf doc
-pdf(here::here("output", "plots", "residuals.pdf"), width=10, height=7)
+pdf(here::here("output", "results", "residuals.pdf"), width=10, height=7)
 imap(models, resid_plots)
 dev.off()
 
