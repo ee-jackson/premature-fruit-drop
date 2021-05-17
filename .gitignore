@@ -1,7 +1,8 @@
 #ignore these folders
 docs/
 data/
-output/
+output/plots
+output/tables
 code/graveyard
 
 # General
