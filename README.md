@@ -4,7 +4,7 @@ This repository contains code for the project: Premature fruit drop in a tropica
 
 ## Data sets used in this project
 
-The seed rain data set, `BCI_TRAP200_20190215_spcorrected.txt`, and seed trait data set, `20120227_seedsMassForTraits.csv`, were provided by Joe Wright (wrightj@si.edu) and are not shared publicly.
+The seed rain data set, `BCI_TRAP200_20190215_spcorrected.txt`, and seed trait data set, `20120227_seedsMassForTraits.csv`, were provided by Joe Wright (wrightj@si.edu).
 
 The plant trait data set, `TidyTrait.csv`, and phylogenetic tree, `PhyloExtraSpec.tree`, are in the [Dryad Digital Repository](https://doi.org/10.5061/dryad.230j5ch).
 
