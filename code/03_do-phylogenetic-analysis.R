@@ -12,7 +12,6 @@ groundhog_day = "2021-04-29"
 groundhog.library("tidyverse", groundhog_day)
 groundhog.library("phytools", groundhog_day)
 groundhog.library("ape", groundhog_day)
-groundhog.library("here", groundhog_day)
 
 # Load data ---------------------------
 
@@ -50,8 +49,7 @@ model_data$plant_species19 <- ifelse(is.na(model_data$plant_species19),
 model_data$plant_species19 <- as.factor(model_data$plant_species19)
 model_data <- rename(model_data, taxa = plant_species19)
 
-# get tree in order
-
+# drop species that are in the tree but not in the data
 check <- geiger::name.check(phy = PhyloExtraSpec, data = model_data,
     data.names = model_data$taxa)
 check
@@ -87,15 +85,26 @@ phytools::phylosig(x = p_a, tree=phylo,
 # Plot tree ---------------------------
 
 # plot map of mean proportion abscised across the tree
-obj <- phytools::contMap(phylo, p_a, plot=F,legend=1.5) ->obj
+obj <- phytools::contMap(phylo, p_a, plot=F)
 
 obj <- setMap(obj,colors=c("#F0F921FF", "#CC4678FF", "#0D0887FF"))
 
-plot(obj, fsize=c(0.5,1), lwd=3, sig=1, type="fan")
-
-# save
+# save as tiff
 tiff(file = here::here("output", "figures", "s2_phylotree.tiff"),
-    width = 180, height = 180, units = "mm", res = 300)
-plot(obj, fsize=c(0.5,1), lwd=1.5,legend=65,
-    type="fan", sig=1, lwd=1.5,res = 300,ftype="bi")
+    width = 180, height = 180, units = "mm", res = 600)
+plot(obj, legend=FALSE, fsize=c(0.5,1), lwd=2,
+     type="fan", sig=1, res = 1000,ftype="bi")
+add.color.bar(90,obj$cols,title="premature seed\nabscission\n",
+              lims = obj$lims, digits = 1, prompt = FALSE, x = -220, y = -200,
+              lwd = 2, fsize=0.8, subtitle="")
+dev.off()
+
+# as pdf
+pdf(file = here::here("output", "figures", "s2_phylotree3.pdf"),
+    width = 7.09, height = 7.09)
+plot(obj, legend=FALSE, fsize=c(0.5,1), lwd=2,
+     type="fan", sig=1, res = 1000)
+add.color.bar(90,obj$cols,title="premature seed\nabscission\n",
+              lims = obj$lims, digits = 1, prompt = FALSE, x = -220, y = -200,
+              lwd = 2, fsize=0.8, subtitle="")
 dev.off()
