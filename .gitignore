@@ -1,9 +1,20 @@
 #ignore these folders
-docs/
-data/
+data/extra
 output/plots
 output/tables
 code/graveyard
+
+# just get rid of this when pub
+data/ 
+
+docs/*pdf
+docs/*png
+*docx
+*doc
+
+#ignore joe's files
+data/raw/BCI_TRAP200_20190215_spcorrected.txt
+data/raw/20120227_seedsMassForTraits.csv
 
 # General
 .DS_Store
