@@ -8,30 +8,23 @@
 # Load packages ---------------------------
 
 library("groundhog")
-groundhog_day = "2021-04-29"
+groundhog_day = "2021-05-01"
 groundhog.library("tidyverse", groundhog_day)
 groundhog.library("lme4", groundhog_day)
 groundhog.library("DHARMa", groundhog_day)
 groundhog.library("broom.mixed", groundhog_day)
-groundhog.library("here", groundhog_day)
 
 # Load data ---------------------------
 
 set.seed(123)
 
-load(here::here("data", "clean", "fruit_traits.RData"))
+fruit_traits <- readRDS(here::here("data", "clean", "fruit_traits.rds"))
 
-# Clean up data ---------------------------
+# Ready data ---------------------------
 
-# round number of seeds to integers
+# round number of seeds to integers or else DHARMa will not recognise as binomial
 fruit_traits$abscised_seeds <- round(fruit_traits$abscised_seeds)
 fruit_traits$viable_seeds <- round(fruit_traits$viable_seeds)
-
-fruit_traits$year <- as.factor(fruit_traits$year)
-fruit_traits$sp4 <- as.factor(fruit_traits$sp4)
-
-# only include sp x year points if there were at least 10 parts found
-fruit_traits <- subset(fruit_traits, sum_parts >= 10)
 
 # transform
 fruit_traits %>%
@@ -58,7 +51,7 @@ models <- lapply(setNames(vars, vars), function(var) {
 	}
 )
 
-save(models, file = here::here("output", "results", "model-fits.RData"))
+saveRDS(models, file = here::here("output", "results", "model-fits.rds"))
 
 # look at the output
 lapply(models, summary)
@@ -82,7 +75,7 @@ results # we will use this for plotting
 resid_plots <- function(model, modelname) {
      output <- DHARMa::simulateResiduals(fittedModel = model)
 
-     plot(output, sub=modelname)
+     plot(output, sub = modelname)
 }
 
 # look at a residual plot for one variable to check if it's working
@@ -107,14 +100,14 @@ lapply(modelssim, testDispersion)
 
 # create labels
 labs <- c(
-            height_avg_cs = "Tree height (m)",
-            cvseed_cs = "Interannual crop size variation",
-            cofruit_cs = "Overlap in fruit production",
-            bcireproductive_log_cs = "log Local abundance",
-            endocarp_investment_cs = "Endocarp investment (g)",
-            seed_dry_log_cs ="log Seed dry mass (g)",
+            height_avg_cs = "Tree height",
+            cvseed_cs = "Temporal crop size variation",
+            cofruit_cs = "Temporal overlap in fruit\nproduction with other species",
+            bcireproductive_log_cs = "Local abundance of conspecifics",
+            endocarp_investment_cs = "Investment in mechanical\nseed defences",
+            seed_dry_log_cs ="Seed mass",
             proportion_abscised = "Proportion of seeds abscised",
-        	  seedpred_pres = "Presence of seed predator")
+        	  seedpred_pres = "Presence of insect seed predator")
 
 # plot effect sizes and confidence intervals
 ggplot(results, aes(x = vars, y= estimate)) +
@@ -127,5 +120,5 @@ ggplot(results, aes(x = vars, y= estimate)) +
     coord_flip() +
     theme_classic(base_size = 8)
 
-ggsave(here::here("output", "figures", "02_effects.tiff"),
-    device = "tiff", dpi = 350, width = 80, height = 80, units = "mm")
+ggsave(here::here("output", "figures", "02_effects.pdf"),
+    device = "pdf", dpi = 600, width = 80, height = 80, units = "mm")
