@@ -10,7 +10,7 @@
 # Load packages ---------------------------
 
 library("groundhog")
-groundhog_day = "2021-05-31"
+groundhog_day = "2021-05-01"
 groundhog.library("tidyverse", groundhog_day)
 
 # Load data ---------------------------
