@@ -2,15 +2,16 @@
 
 ## Author: E E Jackson, eleanor.elizabeth.j@gmail.com
 ## Script: 00_calculate-proportion-abscised.R
-## Desc: calculate proportion of prematurely abscised seeds, per year, per sp
+## Desc: create a clean dataset for downstream analyses: calculate proportion of
+##       prematurely abscised seeds, per year, per sp and join with plant and
+##       seed trait datasets
 ## Date: November 2019
 
 # Load packages ---------------------------
 
 library("groundhog")
-groundhog_day = "2021-04-29"
+groundhog_day = "2021-05-31"
 groundhog.library("tidyverse", groundhog_day)
-groundhog.library("here", groundhog_day)
 
 # Load data ---------------------------
 
@@ -24,7 +25,7 @@ seed_trait <- read.csv(here::here("data", "raw","20120227_seedsMassForTraits.csv
 plant_trait <- read.csv(here::here("data", "raw","TidyTrait.csv"),
                        header=TRUE, stringsAsFactors = FALSE)
 
-# Clean up data ---------------------------
+# Clean up and join seed rain with seed trait data ---------------------------
 
 # convert fetcha to class Date
 seed_rain$fecha <- as.character(seed_rain$fecha)
@@ -63,7 +64,7 @@ abs_dat <- seed_dat %>%
 	summarise(quantity_sum= sum(quantity, na.rm = TRUE)) %>%
 	ungroup()
 
-# Calculate sum of viable seeds
+# calculate sum of viable seeds
 
 abs_dat_v <- subset(abs_dat, part== 1 | part== 2) %>%
 	replace(., is.na(.), 0) %>%
@@ -75,7 +76,7 @@ abs_dat_v <- subset(abs_dat, part== 1 | part== 2) %>%
 	summarise(viable_seeds= sum(viable_seeds, na.rm = TRUE)) %>%
 	ungroup()
 
-# Calculate sum of abscised seeds
+# calculate sum of abscised seeds
 
 abs_dat_a <- subset(abs_dat, part== 5) %>%
 	replace(., is.na(.), 0) %>%
@@ -94,7 +95,8 @@ prop_dat <- full_join(abs_dat_a, abs_dat_v,
 prop_dat <- prop_dat %>%
 	replace(., is.na(.), 0) %>%
 	rowwise() %>%
-	mutate(total_seeds = sum(abscised_seeds, viable_seeds, na.rm = TRUE), proportion_abscised = abscised_seeds / total_seeds) %>%
+	mutate(total_seeds = sum(abscised_seeds, viable_seeds, na.rm = TRUE),
+	       proportion_abscised = abscised_seeds / total_seeds) %>%
 	ungroup()
 
 # create and add a column for the sum of parts found
@@ -113,15 +115,29 @@ plant_trait %>%
 	rename(SP4 = Codigo, SP6 = Code6) %>%
 	select(SP4, SP6, Plant_species19, Family, HEIGHT_AVG, seed_dry,
 		cvseed,  CoFruit, BCIReproductive, Endocarp_investment,
-		SeedPredationRate, SeedPred_n, SeedPred_pres, Coleo_pres,
-		Hymeno_pres, Lepid_pres) -> plant_trait
+		SeedPred_pres) -> plant_trait
 
 # join
 fruit_traits <- left_join(fruit_dat, plant_trait, by = "SP4", all.x = TRUE)
 
-# make lowercase
-colnames(fruit_traits) <- tolower(colnames(fruit_traits))
-fruit_traits$lifeform <- str_to_title(fruit_traits$lifeform, locale = "en")
-fruit_traits$lifeform <- as.factor(fruit_traits$lifeform)
+# Tidy and save ---------------------------
 
-save(fruit_traits, file = here::here("data", "clean", "fruit_traits.RData"))
+# make colnames lowercase
+colnames(fruit_traits) <- tolower(colnames(fruit_traits))
+
+# change lifeform from caps to title case
+fruit_traits$lifeform <- str_to_title(fruit_traits$lifeform, locale = "en")
+
+# need factors when fitting models later
+fruit_traits$year <- as.factor(fruit_traits$year)
+fruit_traits$sp4 <- as.factor(fruit_traits$sp4)
+
+# only include sp x year data points if there were at least 10 parts found
+fruit_traits <- subset(fruit_traits, sum_parts >= 10)
+
+# save as rds
+saveRDS(fruit_traits, file = here::here("data", "clean", "fruit_traits.rds"))
+
+# save as csv
+write.csv(fruit_traits, row.names = FALSE,
+          file = here::here("data", "clean", "fruit_traits.csv"))
