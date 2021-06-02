@@ -8,7 +8,7 @@
 # Load packages ---------------------------
 
 library("groundhog")
-groundhog_day = "2021-04-29"
+groundhog_day = "2021-05-01"
 groundhog.library("tidyverse", groundhog_day)
 groundhog.library("phytools", groundhog_day)
 groundhog.library("ape", groundhog_day)
@@ -19,11 +19,9 @@ groundhog.library("ape", groundhog_day)
 PhyloExtraSpec <- read.tree(here::here("data", "raw", "PhyloExtraSpec.tree"))
 
 # load dataset
-load(here::here("data", "clean", "fruit_traits.RData"))
+fruit_traits <- readRDS(here::here("data", "clean", "fruit_traits.rds"))
 
-# Clean up data ---------------------------
-
-fruit_traits <- subset(fruit_traits, sum_parts >= 10)
+# Ready data ---------------------------
 
 # mean proportion_abscised across yrs, 1 value per sp
 fruit_traits %>%
@@ -66,7 +64,7 @@ phylo$node.label <- 1:length(phylo$node.label)
 phylo$edge.length  <- phylo$edge.length + 0.001
 
 # put them in the right order
-model_data <- model_data[   match(phylo$tip.label, model_data$taxa),   ]
+model_data <- model_data[  match(phylo$tip.label, model_data$taxa),  ]
 
 p_a <- model_data$proportion_abscised
 
@@ -75,12 +73,12 @@ names(p_a) <- model_data$taxa
 # Test for phylo signal ---------------------------
 
 # estimate Blomberg’s K
-phytools::phylosig(x = p_a, tree=phylo,
-    test=TRUE, nsim = 1000, method="K")
+phytools::phylosig(x = p_a, tree = phylo,
+    test=TRUE, nsim = 1000, method = "K")
 
 # estimate Pagel’s lambda
-phytools::phylosig(x = p_a, tree=phylo,
-    test=TRUE, nsim = 1000, method="lambda")
+phytools::phylosig(x = p_a, tree = phylo,
+    test=TRUE, nsim = 1000, method = "lambda")
 
 # Plot tree ---------------------------
 
@@ -88,16 +86,6 @@ phytools::phylosig(x = p_a, tree=phylo,
 obj <- phytools::contMap(phylo, p_a, plot=F)
 
 obj <- setMap(obj,colors=c("#F0F921FF", "#CC4678FF", "#0D0887FF"))
-
-# save as tiff
-tiff(file = here::here("output", "figures", "s2_phylotree.tiff"),
-    width = 180, height = 180, units = "mm", res = 600)
-plot(obj, legend=FALSE, fsize=c(0.5,1), lwd=2,
-     type="fan", sig=1, res = 1000,ftype="bi")
-add.color.bar(90,obj$cols,title="premature seed\nabscission\n",
-              lims = obj$lims, digits = 1, prompt = FALSE, x = -220, y = -200,
-              lwd = 2, fsize=0.8, subtitle="")
-dev.off()
 
 # as pdf
 pdf(file = here::here("output", "figures", "s2_phylotree3.pdf"),
