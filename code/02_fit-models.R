@@ -35,7 +35,8 @@ fruit_traits %>%
     seed_dry_log = log(seed_dry),
     bcireproductive_log = log(bcireproductive)) %>%
     mutate(seed_dry_log_cs = scale(seed_dry_log),
-    bcireproductive_log_cs = scale(bcireproductive_log)) -> fruit_traits
+    bcireproductive_log_cs = scale(bcireproductive_log),
+    seedpred_pres = as.factor(seedpred_pres)) -> fruit_traits
 
 # Fit models ---------------------------
 
@@ -57,10 +58,10 @@ saveRDS(models, file = here::here("output", "results", "model-fits.rds"))
 lapply(models, summary)
 
 # compute per-model statistics
-purrr::map_dfr(models, broom::glance, conf.int = TRUE, .id = "vars")
+purrr::map_dfr(models, broom.mixed::glance, conf.int = TRUE, .id = "vars")
 
 # compute statistics about each of the coefficients for each model
-res_anova <- purrr::map_dfr(models, broom::tidy,
+res_anova <- purrr::map_dfr(models, broom.mixed::tidy,
 							conf.int = TRUE, .id = "vars")
 
 write.csv(res_anova, here::here("output", "results", "model-coefficients.csv"))
