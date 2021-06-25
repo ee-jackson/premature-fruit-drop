@@ -3,6 +3,7 @@ data/extra
 output/plots
 output/tables
 code/graveyard
+code/exploration/*html
 
 # just get rid of this when pub
 data/ 
