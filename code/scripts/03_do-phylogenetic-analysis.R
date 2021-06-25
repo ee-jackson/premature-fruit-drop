@@ -15,7 +15,7 @@ groundhog.library("ape", groundhog_day)
 
 # Load data ---------------------------
 
-# load tree
+# load tree - available here https://doi.org/10.5061/dryad.230j5ch
 PhyloExtraSpec <- read.tree(here::here("data", "raw", "PhyloExtraSpec.tree"))
 
 # load dataset
