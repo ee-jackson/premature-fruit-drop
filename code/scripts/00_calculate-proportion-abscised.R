@@ -15,13 +15,15 @@ groundhog.library("tidyverse", groundhog_day)
 
 # Load data ---------------------------
 
-# seed rain data
+# seed rain data - from Joe Wright
 seed_rain <- read.table(here::here("data", "raw", "BCI_TRAP200_20190215_spcorrected.txt"),
                         header=TRUE, stringsAsFactors = FALSE)
-# seed traits
+
+# seed traits - from Joe Wright
 seed_trait <- read.csv(here::here("data", "raw","20120227_seedsMassForTraits.csv"),
                        header=TRUE, stringsAsFactors = FALSE)
-# plant traits
+
+# plant traits - available here https://doi.org/10.5061/dryad.230j5ch
 plant_trait <- read.csv(here::here("data", "raw","TidyTrait.csv"),
                        header=TRUE, stringsAsFactors = FALSE)
 
