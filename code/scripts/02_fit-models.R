@@ -87,16 +87,6 @@ pdf(here::here("output", "results", "residuals.pdf"), width=10, height=7)
 imap(models, resid_plots)
 dev.off()
 
-# loop through to get simulated residuals for all model fits
-modelssim <-lapply(models, simulateResiduals)
-
-# test simulated residuals for zero inflation
-# a value > 1 means that it has more zeros than expected
-lapply(modelssim, testZeroInflation)
-
-# test for over/undersdispersion
-lapply(modelssim, testDispersion)
-
 # Plot models ---------------------------
 
 # create labels
