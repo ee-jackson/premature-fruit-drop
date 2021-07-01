@@ -82,13 +82,14 @@ phytools::phylosig(x = p_a, tree = phylo,
 
 # Plot tree ---------------------------
 
-# plot map of mean proportion abscised across the tree
+# plot map of mean proportion abscissed across the tree
 obj <- phytools::contMap(phylo, p_a, plot=F)
 
+# colours from viridis colour palette
 obj <- setMap(obj,colors=c("#F0F921FF", "#CC4678FF", "#0D0887FF"))
 
 # as pdf
-pdf(file = here::here("output", "figures", "s2_phylotree3.pdf"),
+pdf(file = here::here("output", "figures", "03_phylotree.pdf"),
     width = 7.09, height = 7.09)
 plot(obj, legend=FALSE, fsize=c(0.5,1), lwd=2,
      type="fan", sig=1, res = 1000)
