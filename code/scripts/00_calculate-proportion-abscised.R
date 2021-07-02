@@ -58,30 +58,29 @@ seed_dat <- seed_dat %>%
 
 glimpse(seed_dat)
 
+# check for any NAs
+sapply(seed_dat, function(x) sum(is.na(x)))
+
 # Calculate proportion of seeds absicsed ---------------------------
 
 # create a df that sums quantity of parts by year, sp and part
 abs_dat <- seed_dat %>%
 	group_by(part, SP4, year, N_SEEDFULL, GENUS, SPECIES, LIFEFORM) %>%
-	summarise(quantity_sum= sum(quantity, na.rm = TRUE)) %>%
+	summarise(quantity_sum = sum(quantity, na.rm = TRUE)) %>%
 	ungroup()
 
 # calculate sum of viable seeds
-
 abs_dat_v <- subset(abs_dat, part== 1 | part== 2) %>%
-	replace(., is.na(.), 0) %>%
 	rowwise() %>%
 	mutate(viable_seeds = ifelse(part==1, quantity_sum*N_SEEDFULL,
 		quantity_sum)) %>%
 	ungroup() %>%
 	group_by(SP4, year, GENUS, SPECIES, LIFEFORM) %>%
-	summarise(viable_seeds= sum(viable_seeds, na.rm = TRUE)) %>%
+	summarise(viable_seeds = sum(viable_seeds, na.rm = TRUE)) %>%
 	ungroup()
 
 # calculate sum of abscised seeds
-
 abs_dat_a <- subset(abs_dat, part== 5) %>%
-	replace(., is.na(.), 0) %>%
 	rowwise() %>%
 	mutate(abscised_seeds = quantity_sum*N_SEEDFULL) %>%
 	ungroup() %>%
@@ -104,7 +103,7 @@ prop_dat <- prop_dat %>%
 # create and add a column for the sum of parts found
 sum_parts_dat <- abs_dat %>%
 	group_by(SP4, year) %>%
-	summarise(sum_parts= sum(quantity_sum, na.rm = TRUE)) %>%
+	summarise(sum_parts = sum(quantity_sum, na.rm = TRUE)) %>%
 	ungroup()
 
 fruit_dat <- left_join(prop_dat, sum_parts_dat, by = c("SP4", "year"))

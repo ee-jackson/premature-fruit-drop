@@ -18,7 +18,7 @@ groundhog.library("ape", groundhog_day)
 # load tree - available here https://doi.org/10.5061/dryad.230j5ch
 PhyloExtraSpec <- read.tree(here::here("data", "raw", "PhyloExtraSpec.tree"))
 
-# load dataset
+# load clean dataset
 fruit_traits <- readRDS(here::here("data", "clean", "fruit_traits.rds"))
 
 # Ready data ---------------------------
@@ -82,7 +82,7 @@ phytools::phylosig(x = p_a, tree = phylo,
 
 # Plot tree ---------------------------
 
-# plot map of mean proportion abscissed across the tree
+# plot map of mean proportion abscised across the tree
 obj <- phytools::contMap(phylo, p_a, plot=F)
 
 # colours from viridis colour palette
