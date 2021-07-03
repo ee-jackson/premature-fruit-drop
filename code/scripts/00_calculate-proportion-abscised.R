@@ -2,9 +2,8 @@
 
 ## Author: E E Jackson, eleanor.elizabeth.j@gmail.com
 ## Script: 00_calculate-proportion-abscised.R
-## Desc: create a clean dataset for downstream analyses: calculate proportion of
-##       prematurely abscised seeds, per year, per sp and join with plant and
-##       seed trait datasets
+## Desc: Calculate proportion of prematurely abscised seeds,
+##       per year, per sp
 ## Date: November 2019
 
 # Load packages ---------------------------
@@ -21,10 +20,6 @@ seed_rain <- read.table(here::here("data", "raw", "BCI_TRAP200_20190215_spcorrec
 
 # seed traits - from Joe Wright
 seed_trait <- read.csv(here::here("data", "raw","20120227_seedsMassForTraits.csv"),
-                       header=TRUE, stringsAsFactors = FALSE)
-
-# plant traits - available here https://doi.org/10.5061/dryad.230j5ch
-plant_trait <- read.csv(here::here("data", "raw","TidyTrait.csv"),
                        header=TRUE, stringsAsFactors = FALSE)
 
 # Clean up and join seed rain with seed trait data ---------------------------
@@ -55,8 +50,6 @@ seed_dat <- subset(seed_dat,LIFEFORM== "LIANA"|LIFEFORM== "MIDSTORY"
 # remove sp where there is no data for N_SEEDFULL (mean # of seeds per fruit)
 seed_dat <- seed_dat %>%
 	drop_na("N_SEEDFULL")
-
-glimpse(seed_dat)
 
 # check for any NAs
 sapply(seed_dat, function(x) sum(is.na(x)))
@@ -108,37 +101,16 @@ sum_parts_dat <- abs_dat %>%
 
 fruit_dat <- left_join(prop_dat, sum_parts_dat, by = c("SP4", "year"))
 
-# Add plant traits to the dataset ---------------------------
-
-# select columns and only keep if n=>200
-plant_trait %>%
-	subset(TotUnits_collected >= 200) %>%
-	rename(SP4 = Codigo, SP6 = Code6) %>%
-	select(SP4, SP6, Plant_species19, Family, HEIGHT_AVG, seed_dry,
-		cvseed,  CoFruit, BCIReproductive, Endocarp_investment,
-		SeedPred_pres) -> plant_trait
-
-# join
-fruit_traits <- left_join(fruit_dat, plant_trait, by = "SP4", all.x = TRUE)
-
 # Tidy and save ---------------------------
 
 # make colnames lowercase
-colnames(fruit_traits) <- tolower(colnames(fruit_traits))
+colnames(fruit_dat) <- tolower(colnames(fruit_dat))
 
 # change lifeform from caps to title case
-fruit_traits$lifeform <- str_to_title(fruit_traits$lifeform, locale = "en")
+fruit_dat$lifeform <- str_to_title(fruit_dat$lifeform, locale = "en")
 
-# need factors when fitting models later
-fruit_traits$year <- as.factor(fruit_traits$year)
-fruit_traits$sp4 <- as.factor(fruit_traits$sp4)
-
-# only include sp x year data points if there were at least 10 parts found
-fruit_traits <- subset(fruit_traits, sum_parts >= 10)
-
-# save as rds
-saveRDS(fruit_traits, file = here::here("data", "clean", "fruit_traits.rds"))
+glimpse(fruit_dat)
 
 # save as csv
-write.csv(fruit_traits, row.names = FALSE,
-          file = here::here("data", "clean", "fruit_traits.csv"))
+write.csv(fruit_dat, row.names = FALSE,
+          file = here::here("data", "clean", "fruit_drop.csv"))
