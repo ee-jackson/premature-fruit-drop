@@ -1,9 +1,9 @@
 #!/usr/bin/env Rscript
 
 ## Author: E E Jackson, eleanor.elizabeth.j@gmail.com
-## Script: combine-data.R
+## Script: 01_combine-data.R
 ## Desc: create a clean dataset for downstream analyses: combine proportion of
-##       prematurely abscised seeds with plant and seed trait datasets
+##       prematurely abscised seeds with plant trait dataset
 ## Date: July 2021
 
 # Load packages ---------------------------
@@ -36,7 +36,7 @@ plant_trait <- read.csv(here::here("data", "raw","TidyTrait.csv"),
 fruit_drop <- read.csv(here::here("data", "clean","fruit_drop.csv"),
                         header=TRUE, stringsAsFactors = FALSE)
 
-# Clean up plant traits data ---------------------------
+# Clean up plant trait data ---------------------------
 
 # select columns and only keep if n=>200
 plant_trait %>%

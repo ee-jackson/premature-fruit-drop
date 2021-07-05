@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
 ## Author: E E Jackson, eleanor.elizabeth.j@gmail.com
-## Script: 01_plot-proportion-abscised.R
+## Script: 02_plot-proportion-abscised.R
 ## Desc: plot the histogram and trait correlation matrix
 ## Date: March 2020
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
 ## Author: E E Jackson, eleanor.elizabeth.j@gmail.com
-## Script: 03_do-phylogenetic-analysis.R
+## Script: 04_do-phylogenetic-analysis.R
 ## Desc: Test for phylogenetic signal in proportion abscised
 ## Date: March 2020
 
