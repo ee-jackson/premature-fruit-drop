@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
 ## Author: E E Jackson, eleanor.elizabeth.j@gmail.com
-## Script: 02_fit-models.R
+## Script: 03_fit-models.R
 ## Desc: fit GLMMs for proportion abscised and plant traits
 ## Date: June 2020
 

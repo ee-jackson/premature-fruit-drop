@@ -8,7 +8,7 @@ The plant trait dataset, `TidyTrait.csv`, and phylogenetic tree, `PhyloExtraSpec
 
 The seed rain dataset, `BCI_TRAP200_20190215_spcorrected.txt`, and seed trait dataset, `20120227_seedsMassForTraits.csv`, were provided by [Joe Wright](https://stri.si.edu/scientist/s-joseph-wright).
 
-Upon publication, the clean dataset, `fruit_traits.csv`, will be made available. It contains species-specific yearly seed abscission rates and plant attributes collated from the sources listed above. `fruit_traits.csv` was created using the script `00_calculate-proportion-abscised.R`, which you can view within this repository but will be unable to run. However, all downstream analyses from this point (scripts 01 to 03) should be reproducible.
+Upon publication, `fruit_drop.csv`, will be made publicly available. It contains species-specific yearly seed abscission rates which were calculated using the seed rain and seed trait datasets listed above. The script used to create `fruit_drop.csv` can be viewed within this repository at `code/scripts/00_calculate-proportion-abscised.R`. You will be unable to run this script as the data are not publicly available, however, all downstream analyses from this point (scripts 01 to 04) should be reproducible.
 
 ## Contents:
 
