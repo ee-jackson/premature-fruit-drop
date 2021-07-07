@@ -100,13 +100,18 @@ autocor_vals <- bind_rows(test_dfs)
 
 autocor_vals %>% 
   filter(p < 0.05 & statistic <1) %>%
-  arrange(statistic) -> sig_autocor_vals
+  arrange(statistic) -> sig_pos_autocor_vals
 
-sig_autocor_vals
+autocor_vals %>% 
+  filter(p < 0.05 & statistic >3) %>%
+  arrange(statistic) -> sig_neg_autocor_vals
+
+sig_pos_autocor_vals
+sig_neg_autocor_vals
 
 ```
 
-Out of `r nrow(autocor_vals)` values (one for each species in each model), `r nrow(sig_autocor_vals)` are showing significant positive autocorrelation (`r signif(((nrow(sig_autocor_vals)/nrow(autocor_vals))*100), digits = 3)`%). Looking at the tibble output above, it's interesting that some species show more temporal autocorrelation than others. They are also consistently temporally autocorrelated across models - which I think makes sense, as the same values of proportion abscised are used.
+Out of `r nrow(autocor_vals)` values (one for each species in each model), `r nrow(sig_pos_autocor_vals)` are showing significant positive autocorrelation (`r signif(((nrow(sig_pos_autocor_vals)/nrow(autocor_vals))*100), digits = 3)`%) and `r nrow(sig_neg_autocor_vals)` are showing significant negative autocorrelation (`r signif(((nrow(sig_neg_autocor_vals)/nrow(autocor_vals))*100), digits = 3)`%). Looking at the tibbles above, it's interesting that some species show more temporal autocorrelation than others. They are also consistently temporally autocorrelated across models - which I think makes sense, as the same values of proportion abscised are used.
 
 We can also look at the AutoCorrelation Function (ACF), which is calculated for each time lag.
 
@@ -168,12 +173,17 @@ autocor_vals_ar1 <- bind_rows(test_dfs_ar1)
 
 autocor_vals_ar1 %>% 
   filter(p < 0.05 & statistic <1) %>%
-  arrange(statistic) -> sig_autocor_vals_ar1
+  arrange(statistic) -> sig_pos_autocor_vals_ar1
 
-sig_autocor_vals_ar1
+autocor_vals %>% 
+  filter(p < 0.05 & statistic >3) %>%
+  arrange(statistic) -> sig_neg_autocor_vals_ar1
+
+sig_pos_autocor_vals_ar1
+sig_neg_autocor_vals_ar1
 ```
 
-Out of `r nrow(autocor_vals_ar1)` values (one for each species in each model), `r nrow(sig_autocor_vals_ar1)` are showing significant positive autocorrelation. This is `r (nrow(sig_autocor_vals)) -(nrow(sig_autocor_vals_ar1))` less than the models without the AR(1) covariance structure.
+Out of `r nrow(autocor_vals_ar1)` values (one for each species in each model), `r nrow(sig_pos_autocor_vals_ar1)` are showing significant positive autocorrelation. This is `r (nrow(sig_pos_autocor_vals)) -(nrow(sig_pos_autocor_vals_ar1))` less than the models without the AR(1) covariance structure. `r nrow(sig_neg_autocor_vals_ar1)` are showing significant negative correlation, the same as the models without the AR(1) covariance structure.
 
 ```{r ar1-covariance, out.width = "100%", warning=FALSE}
 # autocorrelation values
@@ -243,4 +253,4 @@ ggplot(plot_dat, aes(x = vars, y= estimate)) +
     theme_classic(base_size = 10)
 ```
 
-Only a very small change in the results! Reassuring that it wouldn't change our conclusions if we decided to use the AR(1) covariance structure. However, I think that the autocorrelation we see in our model residuals is minimal and trying to adjust for it pushes the ACF values out of whack.
+Only a very small change in the results! Reassuring that it wouldn't change our conclusions if we decided to use the AR(1) covariance structure. However, I think that the autocorrelation we see in our model residuals is minimal and we don't need to adjust for it.

@@ -1,7 +1,7 @@
 Test for temporal autocorrelation
 ================
 Eleanor Jackson
-25 June, 2021
+07 July, 2021
 
 ``` r
 library("tidyverse")
@@ -121,9 +121,13 @@ autocor_vals <- bind_rows(test_dfs)
 
 autocor_vals %>% 
   filter(p < 0.05 & statistic <1) %>%
-  arrange(statistic) -> sig_autocor_vals
+  arrange(statistic) -> sig_pos_autocor_vals
 
-sig_autocor_vals
+autocor_vals %>% 
+  filter(p < 0.05 & statistic >3) %>%
+  arrange(statistic) -> sig_neg_autocor_vals
+
+sig_pos_autocor_vals
 ```
 
     ## # A tibble: 47 x 4
@@ -141,9 +145,29 @@ sig_autocor_vals
     ## 10     0.622 0.0296      CERT  cofruit_cs            
     ## # … with 37 more rows
 
+``` r
+sig_neg_autocor_vals
+```
+
+    ## # A tibble: 29 x 4
+    ##    statistic        p sp4   model                 
+    ##        <dbl>    <dbl> <fct> <fct>                 
+    ##  1      3.01 0.00238  LUE1  endocarp_investment_cs
+    ##  2      3.02 0.00201  LUE1  seed_dry_log_cs       
+    ##  3      3.10 0.000707 PRIC  cvseed_cs             
+    ##  4      3.15 0.000458 CHRC  cvseed_cs             
+    ##  5      3.16 0.000414 CHRC  endocarp_investment_cs
+    ##  6      3.16 0.000413 CHRC  seed_dry_log_cs       
+    ##  7      3.16 0.000927 GUA1  bcireproductive_log_cs
+    ##  8      3.16 0.000927 GUA1  height_avg_cs         
+    ##  9      3.17 0.000858 GUA1  cofruit_cs            
+    ## 10      3.17 0.000848 GUA1  seedpred_pres         
+    ## # … with 19 more rows
+
 Out of 867 values (one for each species in each model), 47 are showing
-significant positive autocorrelation (5.42%). Looking at the tibble
-output above, it’s interesting that some species show more temporal
+significant positive autocorrelation (5.42%) and 29 are showing
+significant negative autocorrelation (3.34%). Looking at the tibbles
+above, it’s interesting that some species show more temporal
 autocorrelation than others. They are also consistently temporally
 autocorrelated across models - which I think makes sense, as the same
 values of proportion abscised are used.
@@ -213,9 +237,13 @@ autocor_vals_ar1 <- bind_rows(test_dfs_ar1)
 
 autocor_vals_ar1 %>% 
   filter(p < 0.05 & statistic <1) %>%
-  arrange(statistic) -> sig_autocor_vals_ar1
+  arrange(statistic) -> sig_pos_autocor_vals_ar1
 
-sig_autocor_vals_ar1
+autocor_vals %>% 
+  filter(p < 0.05 & statistic >3) %>%
+  arrange(statistic) -> sig_neg_autocor_vals_ar1
+
+sig_pos_autocor_vals_ar1
 ```
 
     ## # A tibble: 42 x 4
@@ -233,9 +261,30 @@ sig_autocor_vals_ar1
     ## 10     0.702 0.000318  TYNC  endocarp_investment_cs
     ## # … with 32 more rows
 
+``` r
+sig_neg_autocor_vals_ar1
+```
+
+    ## # A tibble: 29 x 4
+    ##    statistic        p sp4   model                 
+    ##        <dbl>    <dbl> <fct> <fct>                 
+    ##  1      3.01 0.00238  LUE1  endocarp_investment_cs
+    ##  2      3.02 0.00201  LUE1  seed_dry_log_cs       
+    ##  3      3.10 0.000707 PRIC  cvseed_cs             
+    ##  4      3.15 0.000458 CHRC  cvseed_cs             
+    ##  5      3.16 0.000414 CHRC  endocarp_investment_cs
+    ##  6      3.16 0.000413 CHRC  seed_dry_log_cs       
+    ##  7      3.16 0.000927 GUA1  bcireproductive_log_cs
+    ##  8      3.16 0.000927 GUA1  height_avg_cs         
+    ##  9      3.17 0.000858 GUA1  cofruit_cs            
+    ## 10      3.17 0.000848 GUA1  seedpred_pres         
+    ## # … with 19 more rows
+
 Out of 867 values (one for each species in each model), 42 are showing
 significant positive autocorrelation. This is 5 less than the models
-without the AR(1) covariance structure.
+without the AR(1) covariance structure. 29 are showing significant
+negative correlation, the same as the models without the AR(1)
+covariance structure.
 
 ``` r
 # autocorrelation values
@@ -312,7 +361,7 @@ ggplot(plot_dat, aes(x = vars, y= estimate)) +
 
 ![](figures/2021-06-23_test-temporal-autocorrelation/compare-results-1.png)<!-- -->
 
-Only a very small change in the results! Reassuring that it wouldn't
+Only a very small change in the results! Reassuring that it wouldn’t
 change our conclusions if we decided to use the AR(1) covariance
 structure. However, I think that the autocorrelation we see in our model
-residuals is minimal and we don't need to adjust for it.
+residuals is minimal and we don’t need to adjust for it.
