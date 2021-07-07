@@ -42,7 +42,7 @@ fruit_drop <- read.csv(here::here("data", "clean","fruit_drop.csv"),
 plant_trait %>%
   subset(TotUnits_collected >= 200) %>%
   rename(sp4 = Codigo, sp6 = Code6) %>%
-  select(sp4, sp6, Plant_species19, Family, HEIGHT_AVG, seed_dry,
+  select(sp4, sp6, Plant_species19, HEIGHT_AVG, seed_dry,
          cvseed,  CoFruit, BCIReproductive, Endocarp_investment,
          SeedPred_pres) -> plant_trait
 
