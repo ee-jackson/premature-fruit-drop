@@ -28,6 +28,7 @@ This is the clean data used in the analyses. It is a combination of `fruit_drop.
 | `sp6` | 6-letter species code of plant species  |
 | `species` | Plant species |
 | `genus` | Plant genus |
+| `plant_species19` | Plant *genus_species* (valid in January 2019) |
 | **Seed trap data variables** | |
 | `abscised_seeds` | Count of prematurely abscised seeds (endosperm of seeds is not filled) summed across seed traps |
 | `viable_seeds` | Count of viable seeds (endosperm of seeds is filled) summed across seed traps |
