@@ -24,6 +24,7 @@ seed_trait <- read.csv(here::here("data", "raw","20120227_seedsMassForTraits.csv
 
 # Clean up and join seed rain with seed trait data ---------------------------
 
+## clean seed rain
 # convert fetcha to class Date
 seed_rain$fecha <- as.character(seed_rain$fecha)
 seed_rain$fecha <- as.Date(seed_rain$fecha, "%Y-%m-%d")
@@ -33,23 +34,24 @@ seed_rain$year <- format(as.Date(seed_rain$fecha), "%Y")
 seed_rain <- subset(seed_rain, seed_rain$year != "1987" & seed_rain$year != "2019")
 
 # rename sp as SP4
-seed_rain <- rename(seed_rain, SP4 = sp)
+seed_rain <- rename(seed_rain, sp4 = sp)
 
-# select columns we want from the seed trait dataset
-seed_trait <- seed_trait %>%
-   select(LIFEFORM, N_SEEDFULL, SP4, GENUS, SPECIES)
+## clean seed trait
+# make colnames lowercase
+colnames(seed_trait) <- tolower(colnames(seed_trait))
 
+## join
 # join seed trait and seed rain by 4 letter species code
-seed_dat <- left_join(seed_rain, seed_trait, by = "SP4")
+seed_dat <- left_join(seed_rain, seed_trait, by = "sp4")
 
 # subset data to only include woody plants and parts 1 (mature fruits), 2 (single diaspores), and 5 (immature fruit)
-seed_dat <- subset(seed_dat, part==1|part==2|part==5)
-seed_dat <- subset(seed_dat,LIFEFORM== "LIANA"|LIFEFORM== "MIDSTORY"
-	|LIFEFORM== "SHRUB"|LIFEFORM== "TREE"|LIFEFORM=="UNDERSTORY")
-
-# remove sp where there is no data for N_SEEDFULL (mean # of seeds per fruit)
-seed_dat <- seed_dat %>%
-	drop_na("N_SEEDFULL")
+# remove sp where there is no data for n_seedfull (mean # of seeds per fruit)
+seed_dat %>%
+  filter(part == 1|part == 2|part == 5) %>%
+  filter(lifeform == "LIANA"|lifeform == "MIDSTORY"|
+           lifeform == "SHRUB"|lifeform == "TREE"|lifeform =="UNDERSTORY") %>%
+  drop_na("n_seedfull") %>%
+  select(sp4, genus, species, year, n_seedfull, part, quantity) -> seed_dat
 
 # check for any NAs
 sapply(seed_dat, function(x) sum(is.na(x)))
@@ -58,32 +60,32 @@ sapply(seed_dat, function(x) sum(is.na(x)))
 
 # create a df that sums quantity of parts by year, sp and part
 abs_dat <- seed_dat %>%
-	group_by(part, SP4, year, N_SEEDFULL, GENUS, SPECIES, LIFEFORM) %>%
+	group_by(part, sp4, year, n_seedfull, genus, species) %>%
 	summarise(quantity_sum = sum(quantity, na.rm = TRUE)) %>%
 	ungroup()
 
 # calculate sum of viable seeds
-abs_dat_v <- subset(abs_dat, part== 1 | part== 2) %>%
+abs_dat_v <- subset(abs_dat, part == 1 | part == 2) %>%
 	rowwise() %>%
-	mutate(viable_seeds = ifelse(part==1, quantity_sum*N_SEEDFULL,
+	mutate(viable_seeds = ifelse(part ==1, quantity_sum*n_seedfull,
 		quantity_sum)) %>%
 	ungroup() %>%
-	group_by(SP4, year, GENUS, SPECIES, LIFEFORM) %>%
+	group_by(sp4, year, genus, species) %>%
 	summarise(viable_seeds = sum(viable_seeds, na.rm = TRUE)) %>%
 	ungroup()
 
 # calculate sum of abscised seeds
-abs_dat_a <- subset(abs_dat, part== 5) %>%
+abs_dat_a <- subset(abs_dat, part == 5) %>%
 	rowwise() %>%
-	mutate(abscised_seeds = quantity_sum*N_SEEDFULL) %>%
+	mutate(abscised_seeds = quantity_sum*n_seedfull) %>%
 	ungroup() %>%
-	group_by(SP4, year, GENUS, SPECIES, LIFEFORM) %>%
+	group_by(sp4, year, genus, species) %>%
 	summarise(abscised_seeds= sum(abscised_seeds, na.rm = TRUE)) %>%
 	ungroup()
 
 # join those 2 dfs
 prop_dat <- full_join(abs_dat_a, abs_dat_v,
-	by= c("SP4", "year", "GENUS", "SPECIES", "LIFEFORM"))
+	by= c("sp4", "year", "genus", "species"))
 
 # calculate proportion abscised
 prop_dat <- prop_dat %>%
@@ -95,19 +97,13 @@ prop_dat <- prop_dat %>%
 
 # create and add a column for the sum of parts found
 sum_parts_dat <- abs_dat %>%
-	group_by(SP4, year) %>%
+	group_by(sp4, year) %>%
 	summarise(sum_parts = sum(quantity_sum, na.rm = TRUE)) %>%
 	ungroup()
 
-fruit_dat <- left_join(prop_dat, sum_parts_dat, by = c("SP4", "year"))
+fruit_dat <- left_join(prop_dat, sum_parts_dat, by = c("sp4", "year"))
 
-# Tidy and save ---------------------------
-
-# make colnames lowercase
-colnames(fruit_dat) <- tolower(colnames(fruit_dat))
-
-# change lifeform from caps to title case
-fruit_dat$lifeform <- str_to_title(fruit_dat$lifeform, locale = "en")
+# Check and save ---------------------------
 
 glimpse(fruit_dat)
 
