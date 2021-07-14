@@ -5,15 +5,14 @@
 ## Desc: Test for phylogenetic signal in proportion abscised
 ## Date: March 2020
 
-# Load packages ---------------------------
+# Load packages -----------------------------------------------------------
 
-library("groundhog")
-groundhog_day = "2021-05-01"
-groundhog.library("tidyverse", groundhog_day)
-groundhog.library("phytools", groundhog_day)
-groundhog.library("ape", groundhog_day)
+library("tidyverse") # v1.3.1
+library("phytools") # v0.7-70
+library("ape") # v5.5
+library("here") # v1.0.1
 
-# Load data ---------------------------
+# Load data ---------------------------------------------------------------
 
 # load tree - available here https://doi.org/10.5061/dryad.230j5ch
 PhyloExtraSpec <- read.tree(here::here("data", "raw", "PhyloExtraSpec.tree"))
@@ -21,7 +20,7 @@ PhyloExtraSpec <- read.tree(here::here("data", "raw", "PhyloExtraSpec.tree"))
 # load clean dataset
 fruit_traits <- readRDS(here::here("data", "clean", "fruit_traits.rds"))
 
-# Ready data ---------------------------
+# Ready data --------------------------------------------------------------
 
 # mean proportion_abscised across yrs, 1 value per sp
 fruit_traits %>%
@@ -70,7 +69,7 @@ p_a <- model_data$proportion_abscised
 
 names(p_a) <- model_data$taxa
 
-# Test for phylo signal ---------------------------
+# Test for phylo signal ---------------------------------------------------
 
 # estimate Blomberg’s K
 phytools::phylosig(x = p_a, tree = phylo,
@@ -80,7 +79,7 @@ phytools::phylosig(x = p_a, tree = phylo,
 phytools::phylosig(x = p_a, tree = phylo,
     test=TRUE, nsim = 1000, method = "lambda")
 
-# Plot tree ---------------------------
+# Plot tree ---------------------------------------------------------------
 
 # plot map of mean proportion abscised across the tree
 obj <- phytools::contMap(phylo, p_a, plot=F)

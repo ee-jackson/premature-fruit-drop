@@ -6,14 +6,13 @@
 ##       prematurely abscised seeds with plant trait dataset
 ## Date: July 2021
 
-# Load packages ---------------------------
+# Load packages -----------------------------------------------------------
 
-library("groundhog")
-groundhog_day = "2021-05-01"
-groundhog.library("tidyverse", groundhog_day)
-groundhog.library("rdryad", groundhog_day)
+library("tidyverse") # v1.3.1
+library("rdryad") # v1.0.0
+library("here") # v1.0.1
 
-# Get plant attribute data from Dryad ---------------------------
+# Get plant attribute data from Dryad -------------------------------------
 
 # download from Dryad
 file_paths <- rdryad::dryad_download(doi = "10.5061/dryad.230j5ch")
@@ -31,12 +30,12 @@ lapply(file_paths, move_files)
 plant_trait <- read.csv(here::here("data", "raw","TidyTrait.csv"),
                         header=TRUE, stringsAsFactors = FALSE)
 
-# Get seed abscission rate data ---------------------------
+# Get seed abscission rate data -------------------------------------------
 
 fruit_drop <- read.csv(here::here("data", "clean","fruit_drop.csv"),
                         header=TRUE, stringsAsFactors = FALSE)
 
-# Clean up plant trait data ---------------------------
+# Clean up plant trait data -----------------------------------------------
 
 # select columns and only keep if n=>200
 plant_trait %>%
@@ -49,7 +48,7 @@ plant_trait %>%
 # make colnames lowercase
 colnames(plant_trait) <- tolower(colnames(plant_trait))
 
-# Join data ---------------------------
+# Join data ---------------------------------------------------------------
 
 # join
 fruit_traits <- left_join(fruit_drop, plant_trait, by = "sp4", all.x = TRUE)

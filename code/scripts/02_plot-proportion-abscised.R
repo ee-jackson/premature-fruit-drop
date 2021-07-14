@@ -5,19 +5,18 @@
 ## Desc: plot the histogram and trait correlation matrix
 ## Date: March 2020
 
-# Load packages ---------------------------
+# Load packages -----------------------------------------------------------
 
-library("groundhog")
-groundhog_day = "2021-04-29"
-groundhog.library("tidyverse", groundhog_day)
-groundhog.library("reshape2", groundhog_day)
-groundhog.library("ggcorrplot", groundhog_day)
+library("tidyverse") # v1.3.1
+library("reshape2") # v2_1.4.4
+library("ggcorrplot") #v0.1.3
+library("here") # v1.0.1
 
-# Load data ---------------------------
+# Load data ---------------------------------------------------------------
 
 fruit_traits <- readRDS(here::here("data", "clean", "fruit_traits.rds"))
 
-# Plot histogram ---------------------------
+# Plot histogram ----------------------------------------------------------
 
 fruit_traits %>%
 	select("sp4","year", "proportion_abscised") %>%
@@ -35,7 +34,7 @@ fruit_traits %>%
 ggsave(here::here("output", "figures", "01_histogram.pdf"),
     device = "pdf", dpi = 600, width = 80, height = 60, units = "mm")
 
-# Plot correlation matrix ---------------------------
+# Plot correlation matrix -------------------------------------------------
 
 # log these two as that is how we model them
 fruit_traits$seed_dry_log <- log(fruit_traits$seed_dry)

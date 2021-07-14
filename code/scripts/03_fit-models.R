@@ -5,22 +5,21 @@
 ## Desc: fit GLMMs for proportion abscised and plant traits
 ## Date: June 2020
 
-# Load packages ---------------------------
+# Load packages -----------------------------------------------------------
 
-library("groundhog")
-groundhog_day = "2021-05-01"
-groundhog.library("tidyverse", groundhog_day)
-groundhog.library("lme4", groundhog_day)
-groundhog.library("DHARMa", groundhog_day)
-groundhog.library("broom.mixed", groundhog_day)
+library("tidyverse") # v1.3.1
+library("lme4") # v 1.1-27.1
+library("DHARMa") # v 0.4.1
+library("broom.mixed") # v0.2.7
+library("here") # v1.0.1
 
-# Load data ---------------------------
+# Load data ---------------------------------------------------------------
 
 set.seed(123)
 
 fruit_traits <- readRDS(here::here("data", "clean", "fruit_traits.rds"))
 
-# Ready data ---------------------------
+# Ready data --------------------------------------------------------------
 
 # round number of seeds to integers or else DHARMa will not recognise as binomial
 fruit_traits$abscised_seeds <- round(fruit_traits$abscised_seeds)
@@ -38,7 +37,7 @@ fruit_traits %>%
     bcireproductive_log_cs = scale(bcireproductive_log),
     seedpred_pres = as.factor(seedpred_pres)) -> fruit_traits
 
-# Fit models ---------------------------
+# Fit models --------------------------------------------------------------
 
 # select variables to loop over
 vars <- c("height_avg_cs","cvseed_cs","cofruit_cs","endocarp_investment_cs",
@@ -70,7 +69,7 @@ write.csv(res_anova, here::here("output", "results", "model-coefficients.csv"))
 results <- res_anova[!grepl("(Intercept)", res_anova$term),]
 results # we will use this for plotting
 
-# Do model diagnostics ---------------------------
+# Do model diagnostics ----------------------------------------------------
 
 # a function to create simulated residuals for each model fit
 resid_plots <- function(model, modelname) {
@@ -87,7 +86,7 @@ pdf(here::here("output", "results", "residuals.pdf"), width=10, height=7)
 imap(models, resid_plots)
 dev.off()
 
-# Plot models ---------------------------
+# Plot models -------------------------------------------------------------
 
 # create labels
 labs <- c(

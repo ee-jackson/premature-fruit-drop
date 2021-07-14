@@ -6,13 +6,12 @@
 ##       per year, per sp
 ## Date: November 2019
 
-# Load packages ---------------------------
+# Load packages -----------------------------------------------------------
 
-library("groundhog")
-groundhog_day = "2021-05-01"
-groundhog.library("tidyverse", groundhog_day)
+library("tidyverse") # v1.3.1
+library("here") # v1.0.1
 
-# Load data ---------------------------
+# Load data ---------------------------------------------------------------
 
 # seed rain data - from Joe Wright
 seed_rain <- read.table(here::here("data", "raw", "BCI_TRAP200_20190215_spcorrected.txt"),
@@ -22,7 +21,7 @@ seed_rain <- read.table(here::here("data", "raw", "BCI_TRAP200_20190215_spcorrec
 seed_trait <- read.csv(here::here("data", "raw","20120227_seedsMassForTraits.csv"),
                        header=TRUE, stringsAsFactors = FALSE)
 
-# Clean up and join seed rain with seed trait data ---------------------------
+# Clean up and join seed rain with seed trait data ------------------------
 
 ## clean seed rain
 # convert fetcha to class Date
@@ -56,7 +55,7 @@ seed_dat %>%
 # check for any NAs
 sapply(seed_dat, function(x) sum(is.na(x)))
 
-# Calculate proportion of seeds absicsed ---------------------------
+# Calculate proportion of seeds absicsed ----------------------------------
 
 # create a df that sums quantity of parts by year, sp and part
 abs_dat <- seed_dat %>%
@@ -103,7 +102,7 @@ sum_parts_dat <- abs_dat %>%
 
 fruit_dat <- left_join(prop_dat, sum_parts_dat, by = c("sp4", "year"))
 
-# Check and save ---------------------------
+# Check and save ----------------------------------------------------------
 
 glimpse(fruit_dat)
 
