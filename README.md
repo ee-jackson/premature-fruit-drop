@@ -1,6 +1,6 @@
 # premature-fruit-drop
 
-This repository contains code and data associated with the article: __Premature fruit drop in a tropical forest plant community__. Upon publication it will be archived in the Dryad Digital Repository.
+This repository contains code associated with the article: __Premature fruit drop in a tropical forest plant community__.
 
 ## Datasets used in this project
 
@@ -8,7 +8,7 @@ The plant trait dataset, `TidyTrait.csv`, and phylogenetic tree, `PhyloExtraSpec
 
 The seed rain dataset, `BCI_TRAP200_20190215_spcorrected.txt`, and seed trait dataset, `20120227_seedsMassForTraits.csv`, were provided by [Joe Wright](https://stri.si.edu/scientist/s-joseph-wright).
 
-Upon publication, `fruit_drop.csv`, will be made publicly available. It contains species-specific yearly seed abscission rates which were calculated using the seed rain and seed trait datasets listed above. The script used to create `fruit_drop.csv` can be viewed within this repository at `code/scripts/00_calculate-proportion-abscised.R`. You will be unable to run this script as the data are not publicly available, however, all downstream analyses from this point (scripts 01 to 04) should be reproducible.
+Upon publication, `fruit_drop.csv`, will be made available on Dryad. It contains species-specific yearly seed abscission rates which were calculated using the seed rain and seed trait datasets listed above. The script used to create `fruit_drop.csv` can be viewed within this repository at `code/scripts/00_calculate-proportion-abscised.R`. You will be unable to run this script as the data are not publicly available, however, all downstream analyses from this point (scripts 01 to 04) should be reproducible.
 
 ## Contents:
 
