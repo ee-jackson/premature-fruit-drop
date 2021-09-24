@@ -3,8 +3,11 @@
 ## Author: E E Jackson, eleanor.elizabeth.j@gmail.com
 ## Script: 00_calculate-proportion-abscised.R
 ## Desc: Calculate proportion of prematurely abscised seeds,
-##       per year, per sp
+##       per year, per species
 ## Date: November 2019
+
+## This script can only be run if you have access to the full seed rain dataset
+## it is not publicly available
 
 # Load packages -----------------------------------------------------------
 
@@ -48,7 +51,7 @@ seed_dat <- left_join(seed_rain, seed_trait, by = "sp4")
 seed_dat %>%
   filter(part == 1|part == 2|part == 5) %>%
   filter(lifeform == "LIANA"|lifeform == "MIDSTORY"|
-           lifeform == "SHRUB"|lifeform == "TREE"|lifeform =="UNDERSTORY") %>%
+           lifeform == "SHRUB"|lifeform == "TREE"|lifeform == "UNDERSTORY") %>%
   drop_na("n_seedfull") %>%
   select(sp4, genus, species, year, n_seedfull, part, quantity) -> seed_dat
 
@@ -66,7 +69,7 @@ abs_dat <- seed_dat %>%
 # calculate sum of viable seeds
 abs_dat_v <- subset(abs_dat, part == 1 | part == 2) %>%
 	rowwise() %>%
-	mutate(viable_seeds = ifelse(part ==1, quantity_sum*n_seedfull,
+	mutate(viable_seeds = ifelse(part == 1, quantity_sum*n_seedfull,
 		quantity_sum)) %>%
 	ungroup() %>%
 	group_by(sp4, year, genus, species) %>%
