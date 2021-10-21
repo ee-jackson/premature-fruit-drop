@@ -1,6 +1,10 @@
 # premature-fruit-drop
 
-This repository contains code associated with the article: __Premature fruit drop in a tropical forest plant community__.
+This repository contains code associated with the article: __Premature fruit drop in a tropical forest plant community__
+
+Currently under peer review at the Journal of Ecology
+
+Contact: eleanor.elizabeth.j@gmail.com
 
 ## Datasets used in this project
 
@@ -25,3 +29,6 @@ The `output/` directory contains the subdirectories `figures/` and `results/`, w
 
 ### docs/
 The `docs/` directory contains the data dictionary and any other relevant documents.
+
+## Requirements
+See session info [here](https://github.com/ee-jackson/premature-fruit-drop/blob/main/docs/session-info.txt)
