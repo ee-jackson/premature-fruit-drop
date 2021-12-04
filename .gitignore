@@ -4,8 +4,9 @@ output/plots
 output/tables
 code/graveyard
 code/exploration/*html
+code/00_calculate-proportion-abscised.R
 
-# just get rid of this when pub
+# data will be archived elsewhere
 data/ 
 
 docs/*pdf
