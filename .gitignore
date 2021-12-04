@@ -3,8 +3,10 @@ data/extra
 output/plots
 output/tables
 code/graveyard
+
+#ignore these files
 code/exploration/*html
-code/00_calculate-proportion-abscised.R
+code/scripts/00_calculate-proportion-abscised.R
 
 # data will be archived elsewhere
 data/ 
