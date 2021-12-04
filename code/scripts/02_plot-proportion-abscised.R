@@ -16,14 +16,14 @@ library("here") # v1.0.1
 
 fruit_traits <- readRDS(here::here("data", "clean", "fruit_traits.rds"))
 
-# Plot histogram ----------------------------------------------------------
+# Create figure 1 ---------------------------------------------------------
 
 fruit_traits %>%
 	select("sp4","year", "proportion_abscised") %>%
 	group_by(sp4) %>%
 	summarise(proportion_abscised_m = mean(proportion_abscised)) %>%
 	ggplot(aes(x=proportion_abscised_m)) +
-	    geom_histogram(aes(y=..count..), binwidth=.05, colour="black", fill="grey", alpha=.2, size=0.25, boundary=0) +
+    geom_histogram(aes(y=..count..), binwidth=.05, colour="black", fill="grey", alpha=.2, size=0.25, boundary=0) +
 		scale_y_continuous(expand= c(0, 0), lim =c(0,45)) +
 		scale_x_continuous(expand= c(0, 0)) +
 		xlab("mean proportion of seeds prematurely abscised") +
@@ -34,7 +34,7 @@ fruit_traits %>%
 ggsave(here::here("output", "figures", "01_histogram.pdf"),
     device = "pdf", dpi = 600, width = 80, height = 60, units = "mm")
 
-# Plot correlation matrix -------------------------------------------------
+# Create figure S1 --------------------------------------------------------
 
 # log these two as that is how we model them
 fruit_traits$seed_dry_log <- log(fruit_traits$seed_dry)

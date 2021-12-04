@@ -8,8 +8,8 @@
 # Load packages -----------------------------------------------------------
 
 library("tidyverse") # v1.3.1
-library("lme4") # v 1.1-27.1
-library("DHARMa") # v 0.4.1
+library("lme4") # v1.1-27.1
+library("DHARMa") # v0.4.1
 library("broom.mixed") # v0.2.7
 library("here") # v1.0.1
 
@@ -86,7 +86,7 @@ pdf(here::here("output", "results", "residuals.pdf"), width=10, height=7)
 imap(models, resid_plots)
 dev.off()
 
-# Plot models -------------------------------------------------------------
+# Create figure 2 ---------------------------------------------------------
 
 # create labels
 labs <- c(

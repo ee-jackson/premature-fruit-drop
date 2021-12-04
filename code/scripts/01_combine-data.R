@@ -12,19 +12,19 @@ library("tidyverse") # v1.3.1
 library("rdryad") # v1.0.0
 library("here") # v1.0.1
 
-# Get plant attribute data from Dryad -------------------------------------
+# Get plant trait data from Dryad -------------------------------------
 
 # download from Dryad
-file_paths <- rdryad::dryad_download(doi = "10.5061/dryad.230j5ch")
+trait_download <- rdryad::dryad_download(doi = "10.5061/dryad.230j5ch")
 
 # function to put downloaded files in the right place
-move_files <- function(x){
-  file.rename( from = file.path(x) ,
-               to = file.path(here::here("data", "raw"), basename(x)) )
+move_files <- function(old_path, new_path){
+  file.rename( from = file.path(old_path) ,
+               to = file.path(new_path, basename(old_path)) )
 }
 
 # apply the function to all files
-lapply(file_paths, move_files)
+lapply(trait_download, move_files, new_path = here::here("data", "raw"))
 
 # load TidyTrait.csv
 plant_trait <- read.csv(here::here("data", "raw","TidyTrait.csv"),
@@ -32,6 +32,13 @@ plant_trait <- read.csv(here::here("data", "raw","TidyTrait.csv"),
 
 # Get seed abscission rate data -------------------------------------------
 
+# download from Dryad
+fruit_drop_download <- rdryad::dryad_download(doi = "10.5061/dryad.4mw6m909j")
+
+# move files
+lapply(fruit_drop_download, move_files, new_path = here::here("data", "clean"))
+
+# load fruit_drop.csv
 fruit_drop <- read.csv(here::here("data", "clean","fruit_drop.csv"),
                         header=TRUE, stringsAsFactors = FALSE)
 

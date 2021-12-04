@@ -79,7 +79,8 @@ phytools::phylosig(x = p_a, tree = phylo,
 phytools::phylosig(x = p_a, tree = phylo,
     test=TRUE, nsim = 1000, method = "lambda")
 
-# Plot tree ---------------------------------------------------------------
+
+# Create figure 3 ---------------------------------------------------------
 
 # plot map of mean proportion abscised across the tree
 obj <- phytools::contMap(phylo, p_a, plot=F)
