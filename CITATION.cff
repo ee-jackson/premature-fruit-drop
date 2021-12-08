@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+- family-names: "Jackson"
+  given-names: "Eleanor E"
+  orcid: "https://orcid.org/0000-0002-9884-2972"
+- family-names: "Wright"
+  given-names: "S Joseph"
+- family-names: "Calderón"
+  given-names: "Osvaldo"
+- family-names: "Bullock"
+  given-names: "James M"
+- family-names: "Oliver"
+  given-names: "Tom"
+- family-names: "Gripenberg"
+  given-names: "Sofia"
+title: "Does pre-dispersal seed predation explain premature fruit drop in a tropical forest?"
+version: 1.0.0
+doi: 10.5281/zenodo.5767681
+date-released: 2021-12-08
+url: "https://doi.org/10.5281/zenodo.5767681"
