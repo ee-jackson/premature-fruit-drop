@@ -1,5 +1,7 @@
 # premature-fruit-drop
 
+[![DOI](https://zenodo.org/badge/218278065.svg)](https://zenodo.org/badge/latestdoi/218278065)
+
 This repository contains code associated with the article: __Does pre-dispersal seed predation explain premature fruit drop in a tropical forest?__ _Jackson E. E., Wright S. J., Calderón O., Bullock J. M., Oliver T. H., & Gripenberg S._
 
 Currently under peer review at the Journal of Ecology
