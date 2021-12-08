@@ -1,6 +1,6 @@
 # premature-fruit-drop
 
-This repository contains code associated with the article: __Premature fruit drop in a tropical forest plant community__ _Jackson, E. E., Wright, S. J., Calderón, O., Bullock, J. M., Oliver, T. H., & Gripenberg, S._
+This repository contains code associated with the article: __Does pre-dispersal seed predation explain premature fruit drop in a tropical forest?__ _Jackson E. E., Wright S. J., Calderón O., Bullock J. M., Oliver T. H., & Gripenberg S._
 
 Currently under peer review at the Journal of Ecology
 
@@ -28,8 +28,11 @@ The `output/` directory contains the subdirectories `figures/` and `results/`, w
 ### docs/
 The `docs/` directory contains the data dictionary and any other relevant documents.
 
+## Usage
+To reproduce results and figures from the article, run the scripts in `code/scripts/` in the order in which they are labelled. The first script will download the required data from Dryad.
+
 ## Requirements
-See session info [here](https://github.com/ee-jackson/premature-fruit-drop/blob/main/docs/session-info.txt)
+See session info in [`docs/session-info.txt`](https://github.com/ee-jackson/premature-fruit-drop/blob/main/docs/session-info.txt)
 
 ## License
 Code is under a [MIT license](https://github.com/ee-jackson/premature-fruit-drop/blob/main/LICENSE.md).
