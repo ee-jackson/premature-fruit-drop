@@ -23,11 +23,11 @@ fruit_traits %>%
 	group_by(sp4) %>%
 	summarise(proportion_abscised_m = mean(proportion_abscised)) %>%
 	ggplot(aes(x=proportion_abscised_m)) +
-    geom_histogram(aes(y=..count..), binwidth=.05, colour="black", fill="grey", alpha=.2, size=0.25, boundary=0) +
+    geom_histogram(aes(y=..count..), binwidth=.05, colour="white", fill="grey", size=0.25, boundary=0) +
 		scale_y_continuous(expand= c(0, 0), lim =c(0,45)) +
 		scale_x_continuous(expand= c(0, 0)) +
-		xlab("mean proportion of seeds prematurely abscised") +
-		ylab("count of plant species") +
+		xlab("Mean proportion of seeds prematurely abscised") +
+		ylab("Count of plant species") +
 		theme_classic(base_size = 8) +
 		theme(plot.margin = margin(2, 3, 2, 2, "mm") )
 
