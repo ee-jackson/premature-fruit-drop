@@ -10,6 +10,7 @@
 library("tidyverse") # v1.3.1
 library("phytools") # v0.7-70
 library("ape") # v5.5
+library("geiger") # v2.0.7
 library("here") # v1.0.1
 
 # Load data ---------------------------------------------------------------
@@ -33,25 +34,32 @@ fruit_traits %>%
     ungroup() -> fruit_traits_m
 
 fruit_traits %>%
-    dplyr::select(c(sp4,
-                plant_species19, genus, species)) %>%
+    dplyr::select(c(sp4, plant_species19, genus, species)) %>%
     distinct() %>%
-    left_join(fruit_traits_m) -> model_data
+    left_join(fruit_traits_m, by = "sp4") -> model_data
 
 # add taxa name for those that are missing
 model_data$plant_species19 <- ifelse(is.na(model_data$plant_species19),
-    paste(model_data$genus, model_data$species, sep="_"),
+    paste(model_data$genus, sep = "_", model_data$species),
     paste(model_data$plant_species19))
 
 model_data$plant_species19 <- as.factor(model_data$plant_species19)
 model_data <- rename(model_data, taxa = plant_species19)
 
-# drop species that are in the tree but not in the data
+# check if names in the tree and names in the data match
 check <- geiger::name.check(phy = PhyloExtraSpec, data = model_data,
     data.names = model_data$taxa)
 check
 
+# remove species from the tree which are not in the data
 phylo <- drop.tip(PhyloExtraSpec, check$tree_not_data)
+
+# remove species from the data which are not in the tree
+matches <- match(model_data$taxa, check$data_not_tree, nomatch = 0)
+model_data <- subset(model_data, matches == 0)
+
+# OK?
+geiger::name.check(phy = phylo, data.names = model_data$taxa)
 
 # remove polytomies
 phylo <- multi2di(phylo, random = TRUE)
@@ -60,7 +68,7 @@ phylo <- multi2di(phylo, random = TRUE)
 phylo$node.label <- 1:length(phylo$node.label)
 
 # make sure edge length isn't zero
-phylo$edge.length  <- phylo$edge.length + 0.001
+phylo$edge.length <- phylo$edge.length + 0.001
 
 # put them in the right order
 model_data <- model_data[  match(phylo$tip.label, model_data$taxa),  ]
@@ -79,21 +87,20 @@ phytools::phylosig(x = p_a, tree = phylo,
 phytools::phylosig(x = p_a, tree = phylo,
     test=TRUE, nsim = 1000, method = "lambda")
 
-
 # Create figure 3 ---------------------------------------------------------
 
 # plot map of mean proportion abscised across the tree
-obj <- phytools::contMap(phylo, p_a, plot=F)
+obj <- phytools::contMap(tree = phylo, x = p_a, plot = F)
 
 # colours from viridis colour palette
-obj <- setMap(obj,colors=c("#F0F921FF", "#CC4678FF", "#0D0887FF"))
+obj <- setMap(obj, colors = c("#F0F921FF", "#CC4678FF", "#0D0887FF"))
 
 # as pdf
 pdf(file = here::here("output", "figures", "03_phylotree.pdf"),
     width = 7.09, height = 7.09)
-plot(obj, legend=FALSE, fsize=c(0.5,1), lwd=2,
-     type="fan", sig=1, res = 1000)
-add.color.bar(90,obj$cols,title="premature seed\nabscission\n",
+plot(obj, legend = FALSE, fsize = c(0.5,1), lwd = 2,
+     type="fan", sig = 1, res = 1000)
+add.color.bar(90,obj$cols, title = "premature seed\nabscission\n",
               lims = obj$lims, digits = 1, prompt = FALSE, x = -220, y = -200,
-              lwd = 2, fsize=0.8, subtitle="")
+              lwd = 2, fsize = 0.8, subtitle = "")
 dev.off()
