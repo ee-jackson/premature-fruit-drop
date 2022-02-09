@@ -7,12 +7,14 @@ This file contains species-specific yearly seed abscission rates which were calc
 |:---------|:------------|
 | **Identifier variables** | |
 | `year` | Calendar year for which the data was collected |
-| `sp4` | 4-letter ID code of plant species  |
+| `sp4` | 4-letter ID code of plant species. (This code does not change and can be used to track earlier botanical names to compare across publications.)  |
+| `family` | Plant family |
 | `species` | Plant species |
 | `genus` | Plant genus |
+| `infraspecific_epithet` | The scientific name for any taxon below the rank of species. |
 | **Seed trap data variables** | |
-| `abscised_seeds` | Count of prematurely abscised seeds summed across seed traps. Count of prematurely abscised seeds was estimated as the number of immature fruits found in the seed traps multiplied by species-specifc seed-to-fruit ratios. |
-| `viable_seeds` | Count of viable seeds summed across seed traps. Count of viable seeds was estimated as the number of mature fruits found in the seedd traps multiplied by species-specifc seed-to-fruit ratios, plus the number of single diaspores found in the seed traps. |
+| `abscised_seeds` | Count of prematurely abscised seeds summed across seed traps. Count of prematurely abscised seeds was estimated as the number of immature fruits found in the seed traps multiplied by species-specific seed-to-fruit ratios. |
+| `viable_seeds` | Count of viable seeds summed across seed traps. Count of viable seeds was estimated as the number of mature fruits found in the seed traps multiplied by species-specific seed-to-fruit ratios, plus the number of single diaspores found in the seed traps. |
 | `total_seeds` | abscised_seeds + viable_seeds |
 | `proportion_abscised` | abscised_seeds / total_seeds |
 | `sum_parts` | Count of reproductive organs or parts (mature fruits + immature fruits + single diaspores) |
