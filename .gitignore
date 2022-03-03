@@ -7,18 +7,14 @@ code/graveyard
 #ignore these files
 code/exploration/*html
 code/scripts/00_calculate-proportion-abscised.R
-
-# data will be archived elsewhere
-data/ 
-
+docs/graphical-abstract-no-logo.png
+docs/graphical-abstract-transp.png
 docs/*pdf
-docs/*png
 *docx
 *doc
 
-#ignore joe's files
-data/raw/BCI_TRAP200_20190215_spcorrected.txt
-data/raw/20120227_seedsMassForTraits.csv
+# data will be archived elsewhere
+data/ 
 
 # General
 .DS_Store
