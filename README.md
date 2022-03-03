@@ -1,6 +1,6 @@
 # premature-fruit-drop
 
-[ <img src="https://github.com/ee-jackson/premature-fruit-drop/tree/main/docs/graphical-abstract.png?raw=true" width=300 align = right>](https://github.com/ee-jackson/premature-fruit-drop/blob/main/docs/graphical-abstract.png)
+[ <img src="https://raw.githubusercontent.com/ee-jackson/premature-fruit-drop/main/docs/graphical-abstract.png" width=300 align = right>](https://github.com/ee-jackson/premature-fruit-drop/blob/main/docs/graphical-abstract.png)
 
 [![DOI](https://zenodo.org/badge/218278065.svg)](https://zenodo.org/badge/latestdoi/218278065)
 
